@@ -34,3 +34,6 @@ def test_grassmann_map():
     assert np.linalg.matrix_rank(np.hstack([grassmann_map(v45, p4), p5])) == 2
     assert np.allclose(grassmann_log(p4, grassmann_map(v45, p4)), v45)
 
+
+def test_experiment():
+    assert 1 == 3 - 2
