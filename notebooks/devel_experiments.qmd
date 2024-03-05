@@ -47,22 +47,44 @@ form = dmatrix("~ a + x1", data)
 
 ```{python}
 from pyLemur.handle_design import *
+from pyLemur.row_groups import *
 ```
 
 ```{python}
-des, form = convert_formula_to_design_matrix("~ a + b", data)
+des, form = convert_formula_to_design_matrix("~ a + x1", data)
+```
+
+
+```{python}
+row_groups(des)
+```
+
+
+```{python}
+# 400 cells, 30 features 
+Y = np.random.rand(400, 30)
+```
+
+
+```{python}
+import sklearn.decomposition as skd
+
+pca_fit = PCA(n_components=2)
+emb = pca_fit.fit_transform(Y)
+pca_fit.score(Y)
+pca_fit.mean_
+```
+
+
+```{python}
+svd = skd.TruncatedSVD(n_components=2)
+
 ```
 
 ```{python}
-np.unique(des, axis = 0, return_index=True)
-```
+from pyLemur.pca import *
 
-```{python}
-from sklearn.preprocessing import LabelEncoder
-```
+pca = fit_pca(Y, 2, center=False)
+pca
 
-```{python}
-le = LabelEncoder()
-le.fit(des)
 ```
-
