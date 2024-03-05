@@ -1,0 +1,68 @@
+---
+title: "Quick check if new functions work as expected"
+author: Constantin Ahlmann-Eltze
+format:
+    html:
+        code-fold: false
+        embed-resources: true
+        highlight-style: github
+        toc: true 
+        code-line-numbers: true 
+execute:
+  keep-ipynb: true
+jupyter: python3
+---
+
+
+```{python}
+%load_ext autoreload
+%autoreload 2
+```
+
+
+```{python}
+import debugpy
+debugpy.listen(5678)
+print("Waiting for debugger attach")
+debugpy.wait_for_client()
+```
+
+Convert formula to design matrix in Python
+
+```{python}
+import numpy as np
+from patsy import dmatrices, dmatrix, demo_data
+```
+
+
+```{python}
+data = demo_data("a", "b", "x1", "x2", "y", "z column")
+data
+```
+
+```{python}
+form = dmatrix("~ a + x1", data)
+```
+
+
+```{python}
+from pyLemur.handle_design import *
+```
+
+```{python}
+des, form = convert_formula_to_design_matrix("~ a + b", data)
+```
+
+```{python}
+np.unique(des, axis = 0, return_index=True)
+```
+
+```{python}
+from sklearn.preprocessing import LabelEncoder
+```
+
+```{python}
+le = LabelEncoder()
+le.fit(des)
+```
+
