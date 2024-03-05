@@ -27,3 +27,8 @@ def convert_formula_to_design_matrix(formula, obs_data):
         return design_matrix, formula
     else:
         raise ValueError("formula must be a string")
+
+
+def row_groups(matrix):
+    _, inv = np.unique(matrix, axis = 0, return_inverse=True)
+    return inv

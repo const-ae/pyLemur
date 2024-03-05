@@ -1,5 +1,5 @@
 import numpy as np
-from pyLemur.pca import *
+from pyLemur.lin_alg_wrappers import *
 
 def test_fit_pca():
     # Make example data
