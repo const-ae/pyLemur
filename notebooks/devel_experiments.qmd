@@ -36,7 +36,7 @@ from patsy import dmatrices, dmatrix, demo_data
 
 
 ```{python}
-data = demo_data("a", "b", "x1", "x2", "y", "z column")
+data = demo_data("a", "b", "x1", "x2", "y", "z column", min_rows = 400)
 data
 ```
 
@@ -86,5 +86,21 @@ from pyLemur.pca import *
 
 pca = fit_pca(Y, 2, center=False)
 pca
+
+```
+
+
+```{python}
+from pyLemur.lin_alg_wrappers import *
+from pyLemur.design_matrix_utils import *
+
+data = demo_data("a", "b", "x1", "x2", "y", "z column", min_rows = 400)
+des, form = convert_formula_to_design_matrix("~ a + x1", data)
+Y = np.random.rand(400, 30)
+beta = ridge_regression(Y, des, 0)
+beta
+```
+
+```{python}
 
 ```
