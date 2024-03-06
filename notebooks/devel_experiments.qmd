@@ -95,12 +95,39 @@ from pyLemur.lin_alg_wrappers import *
 from pyLemur.design_matrix_utils import *
 
 data = demo_data("a", "b", "x1", "x2", "y", "z column", min_rows = 400)
-des, form = convert_formula_to_design_matrix("~ a + x1", data)
+des, form = convert_formula_to_design_matrix("~ a", data)
 Y = np.random.rand(400, 30)
 beta = ridge_regression(Y, des, 0)
 beta
 ```
 
 ```{python}
+np.unique(des, return_counts=True)[1]
+```
 
+```{python}
+from pyLemur.grassmann_lm import *
+
+base_point = fit_pca(Y, n = 3, center = False).coord_system
+V = grassmann_lm(Y, des, base_point)
+V.shape
+
+```
+
+```{python}
+np.hstack([[1,2,3], [4,5,6]]).shape
+```
+
+
+```{python}
+# The python equivalent of R's seq(-3, 4, length.out = 18)
+# Y = np.linspace(-3, 4, 18).reshape((6,3))
+# des = np.hstack([np.ones((6,1)), np.array([1,0,1,0,1,0]).reshape((6,1))])
+# Read csv file into numpy array
+import pandas as pd
+Y = pd.read_csv("/var/folders/dc/tppjxs9x6ll378lq88lz1fm40000gq/T//Rtmp89jWYn/file128665ac82720").to_numpy().T
+des = pd.read_csv("/var/folders/dc/tppjxs9x6ll378lq88lz1fm40000gq/T//Rtmp89jWYn/file12866a80d470").to_numpy()
+base_point = fit_pca(Y, n = 3, center = False).coord_system
+V = grassmann_lm(Y, des, base_point)
+V
 ```
