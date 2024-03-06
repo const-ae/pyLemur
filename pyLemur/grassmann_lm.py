@@ -2,7 +2,7 @@
 
 import numpy as np
 from pyLemur.design_matrix_utils import row_groups
-from pyLemur.grassmann import grassmann_log
+from pyLemur.grassmann import grassmann_log, grassmann_map
 from pyLemur.lin_alg_wrappers import fit_pca, ridge_regression
 
 
@@ -71,6 +71,16 @@ def grassmann_lm(Y, design_matrix, base_point):
     coef = grassmann_geodesic_regression(group_planes, reduced_design_matrix, base_point, weights = group_sizes)
     return coef
 
-
+def project_data_on_diffemb(Y, design_matrix, coefficients, base_point):
+    n_emb = base_point.shape[0]
+    n_obs = Y.shape[0]
+    res = np.zeros((n_obs, n_emb))
+    des_row_groups, reduced_design_matrix, des_row_group_ids = row_groups(design_matrix, return_reduced_matrix=True,return_group_ids=True)
+    for id in des_row_group_ids:
+        Y_subset = Y[des_row_groups == id,:]
+        covar = reduced_design_matrix[id,:]
+        subspace = grassmann_map(np.dot(coefficients, covar).T, base_point.T)
+        res[des_row_groups == id, :] = Y_subset @ subspace
+    return res
 
     

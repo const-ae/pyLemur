@@ -14,6 +14,7 @@ def test_fit_pca():
     assert np.allclose(pca2.offset, np.zeros(Y.shape[1]))
     assert np.allclose(pca2.coord_system @ pca2.coord_system.T, np.eye(3))
     assert np.allclose(pca2.embedding, (Y - pca2.offset) @ pca2.coord_system.T)
+    assert np.allclose(Y @ pca2.coord_system.T, pca2.embedding)
 
 
 def test_ridge_regression():

@@ -1,8 +1,8 @@
 
 import numpy as np
 
-from pyLemur.grassmann import grassmann_angle_from_point, grassmann_log, grassmann_map, grassmann_project
-from pyLemur.grassmann_lm import grassmann_geodesic_regression, grassmann_lm
+from pyLemur.grassmann import grassmann_angle_from_point, grassmann_map, grassmann_project
+from pyLemur.grassmann_lm import grassmann_geodesic_regression, grassmann_lm, project_data_on_diffemb
 from pyLemur.lin_alg_wrappers import fit_pca
 
 
@@ -44,3 +44,22 @@ def test_grassmann_lm():
     assert np.allclose(grassmann_angle_from_point(grassmann_map(fit[:,:,0].T, base_point.T), plane_a.T), 0)
     assert np.allclose(grassmann_angle_from_point(grassmann_map((fit[:,:,0] + fit[:,:,1]).T, base_point.T), plane_b.T), 0)
     assert np.allclose(grassmann_angle_from_point(grassmann_map((fit[:,:,0] + fit[:,:,2]).T, base_point.T), plane_c.T), 0)
+
+
+def test_project_data_on_diffemb():
+    n_obs = 100
+    base_point = grassmann_project(np.random.randn(5, 2)).T
+    data = np.random.randn(n_obs, 5)
+    des = np.ones((n_obs, 1))
+    fit = grassmann_lm(data, des, base_point)
+    pca = fit_pca(data, 2, center = False)
+    angle = grassmann_angle_from_point(grassmann_map(fit[:,:,0].T, base_point.T), pca.coord_system.T)
+    assert np.allclose(angle, 0)
+
+    proj = project_data_on_diffemb(data, des, fit, base_point)
+    # The projection and the embedding are rotated to each other
+    # Remove rotation effect using orthogonal procrustes
+    U,_,Vt=np.linalg.svd(proj.T @ pca.embedding, full_matrices=False)
+    rot = U @ Vt
+    assert np.allclose(proj @ rot, pca.embedding)
+
