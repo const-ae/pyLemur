@@ -62,12 +62,9 @@ def grassmann_lm(Y, design_matrix, base_point):
     """
     n_emb = base_point.shape[0]
 
-    des_row_groups = row_groups(design_matrix)
-    des_row_group_ids, des_row_group_counts = np.unique(des_row_groups, return_counts=True)
-    # Make a table of the elements in des_row_groups
-    if np.min(des_row_group_counts) < n_emb:
+    des_row_groups, reduced_design_matrix, des_row_group_ids = row_groups(design_matrix, return_reduced_matrix=True,return_group_ids=True)
+    if np.min(np.unique(des_row_groups, return_counts=True)[1]) < n_emb:
         raise ValueError("Too few dataset points in some design matrix group.")
-    reduced_design_matrix = np.unique(design_matrix, axis = 0)
     group_planes = [fit_pca(Y[des_row_groups == i, :], n_emb, center = False).coord_system for i in des_row_group_ids]
     group_sizes = [np.sum(des_row_groups == i) for i in des_row_group_ids]
 

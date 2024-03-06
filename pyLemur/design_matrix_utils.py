@@ -29,6 +29,14 @@ def convert_formula_to_design_matrix(formula, obs_data):
         raise ValueError("formula must be a string")
 
 
-def row_groups(matrix):
-    _, inv = np.unique(matrix, axis = 0, return_inverse=True)
-    return inv
+def row_groups(matrix, return_reduced_matrix = False, return_group_ids = False):
+    reduced_matrix, inv = np.unique(matrix, axis = 0, return_inverse=True)
+    group_ids = np.unique(inv)
+    if return_reduced_matrix and return_group_ids:
+        return inv, reduced_matrix, group_ids
+    elif return_reduced_matrix:
+        return inv, reduced_matrix
+    elif return_group_ids:
+        return inv, group_ids
+    else:
+        return inv
