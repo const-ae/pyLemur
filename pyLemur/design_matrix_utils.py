@@ -1,5 +1,8 @@
-import patsy
+from collections.abc import Mapping
 import numpy as np
+import anndata as ad
+import pandas as pd
+import patsy
 
 def handle_design_parameter(design, data, obs_data):
     n_samples = data.shape[0]
@@ -14,10 +17,43 @@ def handle_design_parameter(design, data, obs_data):
             design_formula = None
         else:
             raise ValueError("design must be a 2d array")
+    elif isinstance(design, list):
+        return handle_design_parameter(" * ".join(design), data, obs_data)
     elif isinstance(design, str):
+        # Check if design starts with a ~
+        if design[0] != "~":
+            design = "~" + design + " - 1"
         design_matrix, design_formula = convert_formula_to_design_matrix(design, obs_data)
     else:
         raise ValueError("design must be a 2d array or string")
+    
+    if design_matrix.shape[0] != n_samples:
+        raise ValueError("number of rows in design matrix must be equal to number of samples in data")
+
+    return design_matrix, design_formula
+
+def handle_column_data(adata, obs_data):
+    a = make_data_frame(adata.obs)
+    b = make_data_frame(obs_data, preferred_index = a.index if a is not None else None)
+    if a is None and b is None:
+        return pd.DataFrame(index = pd.RangeIndex(0, adata.shape[0]))
+    elif a is None:
+        return b
+    elif b is None:
+        return a
+    else:
+        return pd.concat([a, b], axis=1)
+
+def make_data_frame(data, preferred_index = None):
+    if data is None:
+        return None
+    if isinstance(data, pd.DataFrame):
+        return data
+    elif isinstance(data, Mapping):
+        return pd.DataFrame(data, index = preferred_index)
+    else: 
+        raise ValueError("data must be None, a pandas DataFrame or a Mapping object")
+
 
 def convert_formula_to_design_matrix(formula, obs_data):
     # Check if formula is string

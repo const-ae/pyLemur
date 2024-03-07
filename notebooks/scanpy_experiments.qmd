@@ -1,0 +1,94 @@
+---
+title: "Play with scanpy"
+author: Constantin Ahlmann-Eltze
+format:
+    html:
+        code-fold: false
+        embed-resources: true
+        highlight-style: github
+        toc: true 
+        code-line-numbers: true 
+execute:
+  keep-ipynb: true
+jupyter: python3
+---
+
+
+```{python}
+%load_ext autoreload
+%autoreload 2
+```
+
+
+```{python}
+import debugpy
+debugpy.listen(5678)
+print("Waiting for debugger attach")
+debugpy.wait_for_client()
+```
+
+```{python}
+import scanpy as sc
+import pertpy 
+
+adata = pertpy.data.kang_2018()
+adata
+```
+
+```{python}
+adata.obs
+adata.var
+```
+
+```{python}
+import numpy as np
+np.unique(adata.X.sum(axis=0) > 5, axis = 1, return_counts=True)
+```
+
+```{python}
+```
+
+```{python}
+adata.X[0:100,0:10]
+```
+
+```{python}
+def multiply_along_axis(A, B, axis):
+    return np.swapaxes(np.swapaxes(A, axis, -1) * B, -1, axis)
+```
+
+```{python}
+adata.layers["counts"] = adata.X.copy()
+sf = np.ravel(adata.layers["counts"].sum(axis=1))
+sf = sf / np.median(sf)
+adata.layers["logcounts"] = sc.pp.log1p(adata.layers["counts"] / sf)
+```
+
+
+```{python}
+adata.X = adata.layers["logcounts"]
+sc.pp.pca(adata)
+sc.pp.neighbors(adata)
+sc.tl.umap(adata)
+sc.pl.umap(adata, color=["label", "cell_type"])
+```
+
+```{python}
+# Shuffle the rows of adata
+adata = adata[np.random.permutation(adata.obs.index), :]
+```
+
+```{python}
+from pyLemur.lemur import lemur
+
+extra_data = {"test":  np.random.randint(3, size=adata.shape[0]),
+              "cat": ["ABC"[x] for x in np.random.randint(3, size=adata.shape[0])]}
+lemur(adata, design = ["label", "cat"], obs_data=extra_data)
+```
+
+```{python}
+pd.DataFrame(adata.obs.to_dict())
+```
+
+
+
