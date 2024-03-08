@@ -2,6 +2,7 @@
 from typing import Any, Literal
 from collections.abc import Iterable, Mapping
 import numpy as np
+import anndata as ad
 
 from pyLemur.design_matrix_utils import *
 from pyLemur.grassmann_lm import grassmann_lm, project_data_on_diffemb
@@ -32,8 +33,8 @@ def lemur(data: ad.AnnData,
     if linear_coefficient_estimator == "linear":
         if verbose:
             print("Centering the data using linear regression.")
-        lin_coef = ridge_regression(Y, design_matrix)
-        Y = Y - design_matrix @ lin_coef
+        lin_coef = ridge_regression(Y, design_matrix.to_numpy())
+        Y = Y - design_matrix.to_numpy() @ lin_coef
     else: # linear_coefficient_estimator == "zero"
         lin_coef = np.zeros((design_matrix.shape[1], Y.shape[1]))
 
@@ -42,10 +43,10 @@ def lemur(data: ad.AnnData,
     base_point = fit_pca(Y, n_embedding, center = False).coord_system
     if verbose:
         print("Fit regression on latent spaces")
-    coefficients = grassmann_lm(Y, design_matrix, base_point)
+    coefficients = grassmann_lm(Y, design_matrix.to_numpy(), base_point)
     if verbose:
         print("Find shared embedding coordinates")
-    embedding = project_data_on_diffemb(Y, design_matrix, coefficients, base_point)
+    embedding = project_data_on_diffemb(Y, design_matrix.to_numpy(), coefficients, base_point)
 
     embedding, coefficients, base_point = order_axis_by_variance(embedding, coefficients, base_point)
 

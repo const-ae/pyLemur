@@ -28,6 +28,7 @@ debugpy.wait_for_client()
 ```
 
 ```{python}
+import numpy as np
 import scanpy as sc
 import pertpy 
 
@@ -41,7 +42,6 @@ adata.var
 ```
 
 ```{python}
-import numpy as np
 np.unique(adata.X.sum(axis=0) > 5, axis = 1, return_counts=True)
 ```
 
@@ -76,6 +76,21 @@ sc.pl.umap(adata, color=["label", "cell_type"])
 ```{python}
 # Shuffle the rows of adata
 adata = adata[np.random.permutation(adata.obs.index), :]
+```
+
+```{python}
+import formulaic
+import pandas as pd
+df = pd.DataFrame(adata.obs)
+
+des = formulaic.model_matrix("~ label", df)
+form = formulaic.Formula("~ label")
+```
+
+```{python}
+import patsy
+des2 = patsy.dmatrix("~ label", df)
+des2
 ```
 
 ```{python}
@@ -116,4 +131,36 @@ print(grassmann_angle_from_point(grassmann_map(V_slice1.T, fit.uns["lemur"]["bas
 print(grassmann_angle_from_point(grassmann_map((V_slice1 + V_slice2).T, fit.uns["lemur"]["base_point"].T), coord_stim.T))
 ```
 
+
+
+```{python}
+from pyLemur.predict import *
+
+fit.uns["lemur"]["design_matrix"]
+
+```
+
+```{python}
+pred_stim = predict(fit, new_condition = cond(fit, label = "stim", cat = "B"))
+pred_ctrl = predict(fit, new_condition = cond(fit, label = "ctrl", cat = "B"))
+delta = pred_stim - pred_ctrl
+```
+
+```{python}
+gene = 3
+fit.obs["delta"] = delta[:,gene]
+fit.obs["expr"] = fit.layers["logcounts"][:,gene].toarray()
+
+import matplotlib.pyplot as plt
+sc.pl.umap(fit, color="delta", cmap = plt.get_cmap("seismic"), vcenter=0)
+
+sc.pl.umap(fit[fit.obs["label"] == "ctrl"], color="expr", vmax = 2)
+sc.pl.umap(fit[fit.obs["label"] == "stim"], color="expr", vmax = 2)
+```
+
+```{python}
+```
+
+```{python}
+```
 

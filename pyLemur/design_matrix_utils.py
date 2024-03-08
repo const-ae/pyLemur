@@ -1,8 +1,9 @@
 from collections.abc import Mapping
 import numpy as np
-import anndata as ad
 import pandas as pd
-import patsy
+# import patsy
+from formulaic import model_matrix
+
 
 def handle_data(data, layer):
     Y = data.X if layer is None else data.layers[layer]
@@ -59,7 +60,8 @@ def convert_formula_to_design_matrix(formula, obs_data):
     # Check if formula is string
     if isinstance(formula, str):
         # Convert formula to design matrix
-        design_matrix = patsy.dmatrix(formula, obs_data)
+        # design_matrix = patsy.dmatrix(formula, obs_data)
+        design_matrix = model_matrix(formula, obs_data)
         return design_matrix, formula
     else:
         raise ValueError("formula must be a string")
