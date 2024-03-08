@@ -4,10 +4,13 @@ import anndata as ad
 import pandas as pd
 import patsy
 
-def handle_design_parameter(design, data, obs_data):
-    n_samples = data.shape[0]
+def handle_data(data, layer):
+    Y = data.X if layer is None else data.layers[layer]
+    if not isinstance(Y, np.ndarray):
+        Y = Y.toarray()
+    return Y
 
-    # Check if design is np.array
+def handle_design_parameter(design, obs_data):
     if isinstance(design, np.ndarray):
         if design.ndim == 1:
             # Throw error
@@ -18,7 +21,7 @@ def handle_design_parameter(design, data, obs_data):
         else:
             raise ValueError("design must be a 2d array")
     elif isinstance(design, list):
-        return handle_design_parameter(" * ".join(design), data, obs_data)
+        return handle_design_parameter(" * ".join(design), obs_data)
     elif isinstance(design, str):
         # Check if design starts with a ~
         if design[0] != "~":
@@ -27,12 +30,9 @@ def handle_design_parameter(design, data, obs_data):
     else:
         raise ValueError("design must be a 2d array or string")
     
-    if design_matrix.shape[0] != n_samples:
-        raise ValueError("number of rows in design matrix must be equal to number of samples in data")
-
     return design_matrix, design_formula
 
-def handle_column_data(adata, obs_data):
+def handle_obs_data(adata, obs_data):
     a = make_data_frame(adata.obs)
     b = make_data_frame(obs_data, preferred_index = a.index if a is not None else None)
     if a is None and b is None:

@@ -46,22 +46,22 @@ np.unique(adata.X.sum(axis=0) > 5, axis = 1, return_counts=True)
 ```
 
 ```{python}
-```
-
-```{python}
 adata.X[0:100,0:10]
 ```
 
-```{python}
-def multiply_along_axis(A, B, axis):
-    return np.swapaxes(np.swapaxes(A, axis, -1) * B, -1, axis)
-```
 
 ```{python}
 adata.layers["counts"] = adata.X.copy()
-sf = np.ravel(adata.layers["counts"].sum(axis=1))
+sf = np.array(adata.layers["counts"].sum(axis=1))
 sf = sf / np.median(sf)
 adata.layers["logcounts"] = sc.pp.log1p(adata.layers["counts"] / sf)
+```
+
+```{python}
+import scanpy.preprocessing._simple as simple
+var = simple._get_mean_var(adata.layers["logcounts"])[1]
+hvgs = var.argpartition(-1000)[-1000:]
+adata = adata[:, hvgs]
 ```
 
 
@@ -83,12 +83,37 @@ from pyLemur.lemur import lemur
 
 extra_data = {"test":  np.random.randint(3, size=adata.shape[0]),
               "cat": ["ABC"[x] for x in np.random.randint(3, size=adata.shape[0])]}
-lemur(adata, design = ["label", "cat"], obs_data=extra_data)
+fit = lemur(adata, design = ["label", "cat"], obs_data=extra_data)
 ```
 
 ```{python}
-pd.DataFrame(adata.obs.to_dict())
+sc.pp.neighbors(fit, use_rep="embedding")
+sc.tl.umap(fit)
+sc.pl.umap(fit, color=["label", "cat", "cell_type"])
 ```
 
+```{python}
+coord = fit_pca(adata.layers["logcounts"].toarray(), n = 15, center = False).coord_system
+coord2 = fit_pca(adata.layers["logcounts"].toarray(), n = 15, center = False).coord_system
+print(grassmann_angle_from_point(coord2.T, coord.T))
+```
+
+
+```{python}
+from pyLemur.lin_alg_wrappers import *
+from pyLemur.grassmann import *
+
+fit = lemur(adata, design = "~ label", linear_coefficient_estimator="zero")
+V_slice1 = fit.uns["lemur"]["coefficients"][:,:,0]
+V_slice2 = fit.uns["lemur"]["coefficients"][:,:,1]
+
+coord_all = fit_pca(adata.X.toarray(), n = 15, center = False).coord_system
+coord_ctrl = fit_pca(adata.X[adata.obs["label"] == "ctrl", :].toarray(), n = 15, center = False).coord_system
+coord_stim = fit_pca(adata.X[adata.obs["label"] == "stim", :].toarray(), n = 15, center = False).coord_system
+
+print(grassmann_angle_from_point(fit.uns["lemur"]["base_point"].T, coord_all.T))
+print(grassmann_angle_from_point(grassmann_map(V_slice1.T, fit.uns["lemur"]["base_point"].T), coord_ctrl.T))
+print(grassmann_angle_from_point(grassmann_map((V_slice1 + V_slice2).T, fit.uns["lemur"]["base_point"].T), coord_stim.T))
+```
 
 

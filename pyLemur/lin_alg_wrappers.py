@@ -29,7 +29,7 @@ def fit_pca(Y, n, center=True):
         coord_system = pca.components_
         mean = pca.mean_
     else:
-        svd = skd.TruncatedSVD(n_components=n)
+        svd = skd.TruncatedSVD(n_components=n, algorithm='arpack')
         emb = svd.fit_transform(Y)
         coord_system =  svd.components_
         mean = np.zeros(Y.shape[1])
