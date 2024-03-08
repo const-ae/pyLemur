@@ -1,0 +1,84 @@
+---
+title: "Play with scanpy"
+author: Constantin Ahlmann-Eltze
+format:
+    html:
+        code-fold: false
+        embed-resources: true
+        highlight-style: github
+        toc: true 
+        code-line-numbers: true 
+execute:
+  keep-ipynb: true
+jupyter: python3
+---
+
+
+```{python}
+%load_ext autoreload
+%autoreload 2
+```
+
+
+```{python}
+import debugpy
+debugpy.listen(5678)
+print("Waiting for debugger attach")
+debugpy.wait_for_client()
+```
+
+```{python}
+import numpy as np
+import scanpy as sc
+import pertpy 
+import scanpy.preprocessing._simple as simple
+
+adata = pertpy.data.kang_2018()
+adata.layers["counts"] = adata.X.copy()
+sf = np.array(adata.layers["counts"].sum(axis=1))
+sf = sf / np.median(sf)
+adata.layers["logcounts"] = sc.pp.log1p(adata.layers["counts"] / sf)
+var = simple._get_mean_var(adata.layers["logcounts"])[1]
+hvgs = var.argpartition(-1000)[-1000:]
+adata = adata[:, hvgs]
+```
+
+
+```{python}
+adata.X = adata.layers["logcounts"]
+sc.pp.pca(adata)
+sc.pp.neighbors(adata)
+sc.tl.umap(adata)
+sc.pl.umap(adata, color=["label", "cell_type"])
+```
+
+```{python}
+from pyLemur.lemur import lemur
+
+fit = lemur(adata, design = ["label"])
+```
+
+```{python}
+sc.pp.neighbors(fit, use_rep="embedding")
+sc.tl.umap(fit)
+sc.pl.umap(fit, color=["label", "cell_type"])
+```
+
+
+```{python}
+from pyLemur.alignment import *
+align_with_harmony(fit, ridge_penalty = 0.01)
+```
+
+
+```{python}
+nei = sc.pp.neighbors(fit, use_rep="new_embedding")
+sc.tl.umap(fit)
+sc.pl.umap(fit, color=["label", "cell_type"])
+```
+
+
+```{python}
+import matplotlib.pyplot as plt
+plt.scatter(fit.obsm["new_embedding"], fit.obsm["embedding"])
+```

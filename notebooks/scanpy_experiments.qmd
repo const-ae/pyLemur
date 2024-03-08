@@ -98,7 +98,7 @@ from pyLemur.lemur import lemur
 
 extra_data = {"test":  np.random.randint(3, size=adata.shape[0]),
               "cat": ["ABC"[x] for x in np.random.randint(3, size=adata.shape[0])]}
-fit = lemur(adata, design = ["label", "cat"], obs_data=extra_data)
+fit = lemur(adata, design = ["label"], obs_data=extra_data)
 ```
 
 ```{python}
@@ -162,5 +162,38 @@ sc.pl.umap(fit[fit.obs["label"] == "stim"], color="expr", vmax = 2)
 ```
 
 ```{python}
+import harmonypy
+ho = harmonypy.run_harmony(fit.obsm["embedding"], fit.obs, "label")
+fit.obsm["harmony"] = ho.Z_corr.T
+ho.cl
+nei = sc.pp.neighbors(fit, use_rep="harmony")
+sc.tl.umap(fit)
+sc.pl.umap(fit, color=["label", "delta", "cell_type"])
 ```
 
+
+```{python}
+from pyLemur.alignment import *
+align_with_harmony(fit)
+```
+
+```{python}
+ho = harmonypy.run_harmony(fit.obsm["embedding"], fit.obs, "label")
+
+from pyLemur.alignment import *
+
+ho = init_harmony(fit.obsm["embedding"], fit.uns["lemur"]["design_matrix"])
+ho.cluster()
+```
+
+```{python}
+A = np.hstack([np.ones((5, 2)), np.zeros((5, 6))])
+B  = np.arange(8).reshape((8, 1))
+multiply_along_axis(A, B.T, axis = 1)
+```
+
+```{python}
+nei = sc.pp.neighbors(fit, use_rep="new_embedding")
+sc.tl.umap(fit)
+sc.pl.umap(fit, color=["label", "delta", "cell_type"])
+```
