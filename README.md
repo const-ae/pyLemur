@@ -1,18 +1,7 @@
 # pyLemur
 
-The python implementation of the LEMUR method to analyze multi-condition single-cell data.
+The Python implementation of the LEMUR method to analyze multi-condition single-cell data. For the more complete version in R, see https://github.com/const-ae/lemur.
 
+# Disclaimer
 
-# Run code and debug
-
-The notebooks folder contains quarto (.qmd) documents which allow me to experiment with implementations.
-
-To start the debugger, run the following either in VSCode or in a script and then run the Remote Attach debugging
-configuration from the Run and Debug menu in vscode
-
-```python
-import debugpy
-debugpy.listen(5678)
-print("Waiting for debugger attach")
-debugpy.wait_for_client()
-```
+This is an early alpha version of the code, that is insufficiently documented and has not been extensively tested. I hope to make the implementation more robust and then make it available on PyPI in the coming weeks. Until then, use it at your own risk! 
