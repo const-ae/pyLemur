@@ -43,6 +43,29 @@ hvgs = var.argpartition(-1000)[-1000:]
 adata = adata[:, hvgs]
 ```
 
+```{python}
+import numpy as np
+n_cells = 400
+n_genes = 100
+mat = np.arange(n_cells * n_genes).reshape((n_cells, n_genes))
+log_mat = shifted_log_transform(mat)
+```
+
+
+```{python}
+# shifted log transformation ala transformGamPoi
+def shifted_log_transform(counts, overdispersion = 0.05, pseudo_count = None, minimum_overdispersion = 0.001):
+    if pseudo_count is None:
+        pseudo_count = 1/(4 * overdispersion)
+
+    size_factors = mat.sum(axis=1)
+    size_factors = size_factors / np.exp(np.mean(np.log(size_factors)))
+    norm_mat = mat / size_factors.reshape((n_cells, 1))
+    overdispersion = 1/(4 * pseudo_count)
+    res = 1/np.sqrt(overdispersion) * np.log1p(4 * overdispersion * norm_mat)
+    return res
+```
+
 
 ```{python}
 adata.X = adata.layers["logcounts"]
@@ -72,7 +95,7 @@ align_with_harmony(fit, ridge_penalty = 0.01)
 
 
 ```{python}
-nei = sc.pp.neighbors(fit, use_rep="new_embedding")
+nei = sc.pp.neighbors(fit, use_rep="embedding")
 sc.tl.umap(fit)
 sc.pl.umap(fit, color=["label", "cell_type"])
 ```
@@ -81,4 +104,34 @@ sc.pl.umap(fit, color=["label", "cell_type"])
 ```{python}
 import matplotlib.pyplot as plt
 plt.scatter(fit.obsm["new_embedding"], fit.obsm["embedding"])
+```
+
+```{python}
+from pyLemur.predict import *
+pred_ctrl = predict(fit, new_condition = cond(fit, label = "ctrl"))
+pred_stim = predict(fit, new_condition = cond(fit, label = "stim"))
+delta2 = pred_stim - pred_ctrl
+```
+
+```{python}
+plt.scatter(delta[:,0], delta2[:,0])
+```
+
+```{python}
+gene = 0
+fit.obs["delta"] = delta[:,gene]
+fit.obs["delta2"] = delta2[:,gene]
+fit.obs["expr"] = fit.layers["logcounts"][:,gene].toarray()
+
+import matplotlib.pyplot as plt
+sc.pl.umap(fit, color=["delta", "delta2"], cmap = plt.get_cmap("seismic"), vcenter=0)
+
+sc.pl.umap(fit[fit.obs["label"] == "ctrl"], color="expr", vmax = 1)
+sc.pl.umap(fit[fit.obs["label"] == "stim"], color="expr", vmax = 1)
+```
+
+```{python}
+# fit.obs["plot_label"]  = fit.obs["label"].astype(str) + "-" + fit.obs["cell_type"].astype(str)
+fit.obs["plot_label"]  = fit.obs["label"].astype(str) + "-" + fit.obs["cell_type"].astype(str)
+sc.pl.violin(fit, groupby="plot_label", keys="expr")
 ```

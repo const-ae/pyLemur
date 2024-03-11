@@ -91,6 +91,13 @@ def forward_linear_transformation(alignment_coef, design_vector):
         return np.zeros((0, 0))
     else:
         return np.hstack([np.zeros((n_emb, 1)), np.eye(n_emb)]) + np.dot(alignment_coef, design_vector)
+    
+def reverse_linear_transformation(alignment_coef, design_vector):
+    n_emb = alignment_coef.shape[0]
+    if n_emb == 0:
+        return np.zeros((0, 0))
+    else:
+        return np.linalg.inv(np.eye(n_emb) + np.dot(alignment_coef[:,1:,:], design_vector))
 
 def init_harmony(embedding, design_matrix, 
                  theta = 2,

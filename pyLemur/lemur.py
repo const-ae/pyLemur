@@ -51,7 +51,9 @@ def lemur(data: ad.AnnData,
     embedding, coefficients, base_point = order_axis_by_variance(embedding, coefficients, base_point)
 
     data.obsm["embedding"] = embedding
+    al_coef = np.zeros((n_embedding, n_embedding + 1, design_matrix.shape[1]))
     data.uns["lemur"] = {"coefficients": coefficients, 
+                         "alignment_coefficients": al_coef,
                          "base_point": base_point,
                          "formula": formula,
                          "design_matrix": design_matrix,
