@@ -45,7 +45,7 @@ def grassmann_geodesic_regression(coord_systems, design, base_point, weights = N
     return tangent_fit
 
 
-def grassmann_lm(Y, design_matrix, base_point):
+def grassmann_lm(Y, design_matrix, base_point, device = "cpu"):
     """
     Solve Sum_i||Y_i: - Y_i: Proj(Exp_p(Sum_k V_k:: * X_ik))||^2 for V.
     Parameters
@@ -65,7 +65,7 @@ def grassmann_lm(Y, design_matrix, base_point):
     des_row_groups, reduced_design_matrix, des_row_group_ids = row_groups(design_matrix, return_reduced_matrix=True,return_group_ids=True)
     if np.min(np.unique(des_row_groups, return_counts=True)[1]) < n_emb:
         raise ValueError("Too few dataset points in some design matrix group.")
-    group_planes = [fit_pca(Y[des_row_groups == i, :], n_emb, center = False).coord_system for i in des_row_group_ids]
+    group_planes = [fit_pca(Y[des_row_groups == i, :], n_emb, center = False, device = device).coord_system for i in des_row_group_ids]
     group_sizes = [np.sum(des_row_groups == i) for i in des_row_group_ids]
 
     coef = grassmann_geodesic_regression(group_planes, reduced_design_matrix, base_point, weights = group_sizes)

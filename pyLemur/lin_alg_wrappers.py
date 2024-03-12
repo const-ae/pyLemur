@@ -7,7 +7,7 @@ class PCA(NamedTuple):
     coord_system: np.ndarray
     offset: np.ndarray
 
-def fit_pca(Y, n, center=True):
+def fit_pca(Y, n, center=True, device="cpu"):
     """
     Calculate the PCA of a given data matrix Y.
     Parameters
@@ -18,18 +18,27 @@ def fit_pca(Y, n, center=True):
         The number of principal components to return.
     center : bool, default=True
         If True, the data will be centered before computing the covariance matrix.
+    device : str, default="cpu"
     Returns
     -------
     pca : sklearn.decomposition.PCA
         The PCA object.
     """
     if center:
-        pca = skd.PCA(n_components=n)
+        if device == "gpu":
+            from cuml import PCA as cumlPCA
+            pca = cumlPCA(n_components=n,output_type ="numpy")
+        else:
+            pca = skd.PCA(n_components=n)
         emb = pca.fit_transform(Y)
         coord_system = pca.components_
         mean = pca.mean_
     else:
-        svd = skd.TruncatedSVD(n_components=n, algorithm='arpack')
+        if device == "gpu":
+            from cuml import TruncatedSVD as cumlTSVD
+            svd = cumlTSVD(n_components=n,output_type ="numpy")
+        else:
+            svd = skd.TruncatedSVD(n_components=n, algorithm='arpack')
         emb = svd.fit_transform(Y)
         coord_system =  svd.components_
         mean = np.zeros(Y.shape[1])

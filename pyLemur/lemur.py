@@ -4,9 +4,9 @@ from collections.abc import Iterable, Mapping
 import numpy as np
 import anndata as ad
 
-from pyLemur.design_matrix_utils import *
+from pyLemur.design_matrix_utils import handle_design_parameter, handle_obs_data, handle_data
 from pyLemur.grassmann_lm import grassmann_lm, project_data_on_diffemb
-from pyLemur.lin_alg_wrappers import *
+from pyLemur.lin_alg_wrappers import fit_pca, ridge_regression
 
 
 
@@ -17,6 +17,7 @@ def lemur(data: ad.AnnData,
           n_embedding: int = 15, 
           linear_coefficient_estimator: Literal["linear", "zero"] = "linear",
           layer: str | None = None,
+          device: str = "cpu",
           copy: bool = True,
           verbose: bool = True):
     if copy:
@@ -40,10 +41,10 @@ def lemur(data: ad.AnnData,
 
     if verbose:
         print("Find base point")
-    base_point = fit_pca(Y, n_embedding, center = False).coord_system
+    base_point = fit_pca(Y, n_embedding, center = False, device= device).coord_system
     if verbose:
         print("Fit regression on latent spaces")
-    coefficients = grassmann_lm(Y, design_matrix.to_numpy(), base_point)
+    coefficients = grassmann_lm(Y, design_matrix.to_numpy(), base_point, device=device)
     if verbose:
         print("Find shared embedding coordinates")
     embedding = project_data_on_diffemb(Y, design_matrix.to_numpy(), coefficients, base_point)
