@@ -27,7 +27,7 @@ def fit_pca(Y, n, center=True, device="cpu"):
     if center:
         if device == "gpu":
             from cuml import PCA as cumlPCA
-            pca = cumlPCA(n_components=n,output_type ="numpy")
+            pca = cumlPCA(n_components=n,output_type ="numpy",svd_solver='jacobi')
         else:
             pca = skd.PCA(n_components=n)
         emb = pca.fit_transform(Y)
@@ -36,7 +36,7 @@ def fit_pca(Y, n, center=True, device="cpu"):
     else:
         if device == "gpu":
             from cuml import TruncatedSVD as cumlTSVD
-            svd = cumlTSVD(n_components=n,output_type ="numpy")
+            svd = cumlTSVD(n_components=n,output_type ="numpy",algorithm='jacobi')
         else:
             svd = skd.TruncatedSVD(n_components=n, algorithm='arpack')
         emb = svd.fit_transform(Y)
