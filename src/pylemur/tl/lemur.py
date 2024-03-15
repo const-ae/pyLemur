@@ -19,6 +19,9 @@ def lemur(data: ad.AnnData,
           layer: str | None = None,
           copy: bool = True,
           verbose: bool = True):
+    """
+    Space for documentation
+    """
     if copy:
         data = data.copy()
     
