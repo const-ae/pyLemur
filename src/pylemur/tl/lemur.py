@@ -1,5 +1,5 @@
 
-from typing import Any, Literal
+from typing import Any, Literal, Union
 from collections.abc import Iterable, Mapping
 import numpy as np
 import anndata as ad
@@ -12,11 +12,11 @@ from pylemur.tl._lin_alg_wrappers import *
 
 
 def lemur(data: ad.AnnData, 
-          design: str | list[str] | np.ndarray = "~ 1", 
-          obs_data: pd.DataFrame | Mapping[str, Iterable[Any]] | None = None, 
+          design: Union[str, list[str], np.ndarray] = "~ 1", 
+          obs_data: Union[pd.DataFrame, Mapping[str, Iterable[Any]], None] = None, 
           n_embedding: int = 15, 
           linear_coefficient_estimator: Literal["linear", "zero"] = "linear",
-          layer: str | None = None,
+          layer: Union[str, None] = None,
           copy: bool = True,
           verbose: bool = True):
     """
