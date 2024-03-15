@@ -4,7 +4,7 @@
 [![Documentation][badge-docs]][link-docs]
 
 [badge-tests]: https://img.shields.io/github/actions/workflow/status/const-ae/pyLemur/test.yaml?branch=main
-[link-tests]: https://github.com/const-ae/pyLemur/actions/workflows/test.yml
+[link-tests]: https://github.com/const-ae/pyLemur/actions/workflows/test.yaml
 [badge-docs]: https://img.shields.io/readthedocs/pyLemur
 
 The Python implementation of the LEMUR method to analyze multi-condition single-cell data. For the more complete version in R, see https://github.com/const-ae/lemur.
@@ -55,6 +55,6 @@ If you found a bug, please use the [issue tracker][issue-tracker].
 
 [scverse-discourse]: https://discourse.scverse.org/
 [issue-tracker]: https://github.com/const-ae/pyLemur/issues
-[changelog]: https://pyLemur.readthedocs.io/latest/changelog.html
+[changelog]: https://pyLemur.readthedocs.io/page/changelog.html
 [link-docs]: https://pyLemur.readthedocs.io
-[link-api]: https://pyLemur.readthedocs.io/latest/api.html
+[link-api]: https://pyLemur.readthedocs.io/page/api.html
