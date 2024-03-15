@@ -52,7 +52,7 @@ def lemur(data: ad.AnnData,
 
     Returns
     -------
-    ad.AnnData
+    :class:`~anndata.AnnData`
         The input AnnData object with the shared embedding space stored in 
         `data.obsm["embedding"]` and the LEMUR coefficients stored in 
         `data.uns["lemur"]`.
