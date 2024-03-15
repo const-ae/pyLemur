@@ -1,0 +1,29 @@
+{
+  "template": "https://github.com/scverse/cookiecutter-scverse",
+  "commit": "c6e5e5008a7b2915709b7def3cdcddcf6159c301",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "project_name": "pyLemur",
+      "package_name": "pylemur",
+      "project_description": "A Python implementation of the LEMUR algorithm for analyzing multi-condition single-cell RNA-seq data.",
+      "author_full_name": "Your Name",
+      "author_email": "artjom31415@googlemail.com",
+      "github_user": "const-ae",
+      "project_repo": "https://github.com/const-ae/pyLemur",
+      "license": "MIT License",
+      "_copy_without_render": [
+        ".github/workflows/build.yaml",
+        ".github/workflows/test.yaml",
+        "docs/_templates/autosummary/**.rst"
+      ],
+      "_render_devdocs": false,
+      "_jinja2_env_vars": {
+        "lstrip_blocks": true,
+        "trim_blocks": true
+      },
+      "_template": "https://github.com/scverse/cookiecutter-scverse"
+    }
+  },
+  "directory": null
+}
