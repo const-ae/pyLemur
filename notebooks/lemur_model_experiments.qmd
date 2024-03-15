@@ -76,7 +76,7 @@ sc.pl.umap(adata, color=["label", "cell_type"])
 ```
 
 ```{python}
-from pyLemur.lemur import lemur
+from pylemur.tl import lemur
 
 fit = lemur(adata, design = ["label"])
 ```
@@ -89,7 +89,7 @@ sc.pl.umap(fit, color=["label", "cell_type"])
 
 
 ```{python}
-from pyLemur.alignment import *
+from pylemur.tl import align_with_harmony
 align_with_harmony(fit, ridge_penalty = 0.01)
 ```
 
@@ -107,13 +107,14 @@ plt.scatter(fit.obsm["new_embedding"], fit.obsm["embedding"])
 ```
 
 ```{python}
-from pyLemur.predict import *
+from pylemur.tl import predict, cond
 pred_ctrl = predict(fit, new_condition = cond(fit, label = "ctrl"))
 pred_stim = predict(fit, new_condition = cond(fit, label = "stim"))
 delta2 = pred_stim - pred_ctrl
 ```
 
 ```{python}
+import matplotlib.pyplot as plt
 plt.scatter(delta[:,0], delta2[:,0])
 ```
 
