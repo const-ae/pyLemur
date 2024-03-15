@@ -20,6 +20,11 @@ urls.Source = "https://github.com/const-ae/pyLemur"
 urls.Home-page = "https://github.com/const-ae/pyLemur"
 dependencies = [
     "anndata",
+    "formulaic",
+    "harmonypy",
+    "pandas",
+    "numpy",
+    "scikit-learn",
     # for debug logging (referenced from the issue template)
     "session-info",
 ]
