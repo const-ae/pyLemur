@@ -8,11 +8,11 @@
 
 .. autosummary::
     :toctree: generated
-
-    pp.basic_preproc
 ```
 
 ## Tools
+
+To run `lemur` use the following call.
 
 ```{eval-rst}
 .. module:: pylemur.tl
@@ -21,7 +21,10 @@
 .. autosummary::
     :toctree: generated
 
-    tl.basic_tool
+    pylemur.tl.lemur
+    pylemur.tl.align_with_harmony
+    pylemur.tl.predict
+    pylemur.tl.cond
 ```
 
 ## Plotting
@@ -33,6 +36,4 @@
 .. autosummary::
     :toctree: generated
 
-    pl.basic_plot
-    pl.BasicClass
 ```

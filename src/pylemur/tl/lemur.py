@@ -19,8 +19,43 @@ def lemur(data: ad.AnnData,
           layer: Union[str, None] = None,
           copy: bool = True,
           verbose: bool = True):
-    """
-    Space for documentation
+    """Fit the LEMUR model
+
+    Parameters
+    ----------
+    data
+        The AnnData object containing the variance stabilized data and the
+        cell-wise annotations in `data.obs`.
+    design
+        A specification of the experimental design. This can be a string, 
+        which is then parsed using `formulaic`. Alternatively, it can be a
+        a list of strings, which are assumed to refer to the columns in
+        `data.obs`. Finally, it can be a numpy array, representing a 
+        design matrix of size `n_cells` x `n_covariates`. If not provided,
+        a constant design is used.
+    obs_data
+        A pandas DataFrame or a dictionary of iterables containing the 
+        cell-wise annotations. It is used in combination with the 
+        information in `data.obs`.
+    n_embedding
+        The number of dimensions to use for the shared embedding space. 
+    linear_coefficient_estimator
+        The method to use for estimating the linear coefficients. If `"linear"`,
+        the linear coefficients are estimated using ridge regression. If `"zero"`,
+        the linear coefficients are set to zero.
+    layer
+        The name of the layer to use in `data`. If None, the X slot is used.
+    copy
+        Whether to make a copy of `data`.
+    verbose
+        Whether to print progress to the console.
+
+    Returns
+    -------
+    ad.AnnData
+        The input AnnData object with the shared embedding space stored in 
+        `data.obsm["embedding"]` and the LEMUR coefficients stored in 
+        `data.uns["lemur"]`.
     """
     if copy:
         data = data.copy()
