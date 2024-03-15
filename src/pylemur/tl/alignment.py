@@ -1,3 +1,4 @@
+from typing import Union
 import harmonypy
 import numpy as np
 
@@ -5,8 +6,31 @@ from pylemur.tl._design_matrix_utils import row_groups
 from pylemur.tl._lin_alg_wrappers import multiply_along_axis, ridge_regression
 
 
-def align_with_harmony(fit, ridge_penalty = 0.01, max_iter = 10, verbose = True):
+def align_with_harmony(fit, 
+                       ridge_penalty: Union[float, list[float], np.ndarray]  = 0.01, 
+                       max_iter: int = 10,
+                       verbose: bool = True):
+    """Fine-tune the embedding with a parametric version of Harmony.
 
+    Parameters
+    ----------
+    fit
+        The AnnData object produced by `lemur`.
+    ridge_penalty
+        The penalty controlling the flexibility of the alignment.
+    max_iter
+        The maximum number of iterations to perform.
+    verbose
+        Whether to print progress to the console.
+    
+    
+    Returns
+    -------
+    :class:`~anndata.AnnData`
+        The input AnnData object with the updated embedding space stored in 
+        `data.obsm["embedding"]` and an the updated alignment coefficients
+        stored in `data.uns["lemur"]["alignment_coefficients"]`.
+    """
     embedding = fit.obsm["embedding"].copy()
     design_matrix = fit.uns["lemur"]["design_matrix"]
     # Init harmony
