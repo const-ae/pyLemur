@@ -1,13 +1,13 @@
 
 import numpy as np
 
-from pyLemur.grassmann import grassmann_angle_from_point, grassmann_map, grassmann_project
-from pyLemur.grassmann_lm import grassmann_geodesic_regression, grassmann_lm, project_data_on_diffemb, project_diffemb_into_data_space
-from pyLemur.lin_alg_wrappers import fit_pca
+from pylemur.tl.grassmann import grassmann_angle_from_point, grassmann_map, grassmann_project
+from pylemur.tl.grassmann_lm import grassmann_geodesic_regression, grassmann_lm, project_data_on_diffemb, project_diffemb_into_data_space
+from pylemur.tl.lin_alg_wrappers import fit_pca
 
 
 def test_geodesic_regression():
-    n_feat = 5
+    n_feat = 17
     base_point = grassmann_project(np.random.randn(n_feat, 3)).T
     assert np.allclose(base_point @ base_point.T, np.eye(3))
     coord_systems = [grassmann_project(np.random.randn(n_feat, 3)).T for _ in range(10)]

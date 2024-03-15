@@ -4,10 +4,10 @@ import pandas as pd
 import numpy as np
 import formulaic
 import warnings
-from pyLemur.alignment import reverse_linear_transformation
+from pylemur.tl.alignment import reverse_linear_transformation
 
-from pyLemur.design_matrix_utils import row_groups
-from pyLemur.grassmann import grassmann_map
+from pylemur.tl.design_matrix_utils import row_groups
+from pylemur.tl.grassmann import grassmann_map
 
 
 def predict(fit, 

@@ -1,8 +1,8 @@
 import harmonypy
 import numpy as np
 
-from pyLemur.design_matrix_utils import row_groups
-from pyLemur.lin_alg_wrappers import multiply_along_axis, ridge_regression
+from pylemur.tl.design_matrix_utils import row_groups
+from pylemur.tl.lin_alg_wrappers import multiply_along_axis, ridge_regression
 
 
 def align_with_harmony(fit, ridge_penalty = 0.01, max_iter = 10, verbose = True):

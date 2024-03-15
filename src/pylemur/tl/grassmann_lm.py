@@ -1,9 +1,9 @@
 
 
 import numpy as np
-from pyLemur.design_matrix_utils import row_groups
-from pyLemur.grassmann import grassmann_log, grassmann_map
-from pyLemur.lin_alg_wrappers import fit_pca, ridge_regression
+from pylemur.tl.design_matrix_utils import row_groups
+from pylemur.tl.grassmann import grassmann_log, grassmann_map
+from pylemur.tl.lin_alg_wrappers import fit_pca, ridge_regression
 
 
 def grassmann_geodesic_regression(coord_systems, design, base_point, weights = None):
