@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.linear_model import LinearRegression, Ridge
-from pylemur.tl.lin_alg_wrappers import *
+from pylemur.tl._lin_alg_wrappers import *
 
 def test_fit_pca():
     # Make example data

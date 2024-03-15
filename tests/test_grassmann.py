@@ -1,5 +1,5 @@
 import numpy as np
-from pylemur.tl.grassmann import *
+from pylemur.tl._grassmann import *
 
 def test_grassmann_map():
     # Test case 1: empty base point

@@ -1,8 +1,8 @@
 import harmonypy
 import numpy as np
 
-from pylemur.tl.design_matrix_utils import row_groups
-from pylemur.tl.lin_alg_wrappers import multiply_along_axis, ridge_regression
+from pylemur.tl._design_matrix_utils import row_groups
+from pylemur.tl._lin_alg_wrappers import multiply_along_axis, ridge_regression
 
 
 def align_with_harmony(fit, ridge_penalty = 0.01, max_iter = 10, verbose = True):
@@ -10,13 +10,13 @@ def align_with_harmony(fit, ridge_penalty = 0.01, max_iter = 10, verbose = True)
     embedding = fit.obsm["embedding"].copy()
     design_matrix = fit.uns["lemur"]["design_matrix"]
     # Init harmony
-    harm_obj = init_harmony(embedding, design_matrix, verbose = verbose)
+    harm_obj = _init_harmony(embedding, design_matrix, verbose = verbose)
     for idx in range(max_iter):
         if verbose: print(f"Iteration {idx}")
         # Update harmony
         harm_obj.cluster()
         # alignment <- align_impl(training_fit$embedding, harm_obj$R, act_design_matrix, ridge_penalty = ridge_penalty)
-        al_coef, new_emb = align_impl(embedding, harm_obj.R, design_matrix, ridge_penalty = ridge_penalty, calculate_new_embedding = True)
+        al_coef, new_emb = _align_impl(embedding, harm_obj.R, design_matrix, ridge_penalty = ridge_penalty, calculate_new_embedding = True)
         harm_obj.Z_corr = new_emb.T
         harm_obj.Z_cos = multiply_along_axis(new_emb, 1 / np.linalg.norm(new_emb, axis=1).reshape((new_emb.shape[0], 1)), axis = 1).T
 
@@ -25,11 +25,11 @@ def align_with_harmony(fit, ridge_penalty = 0.01, max_iter = 10, verbose = True)
             break
     
     fit.uns["lemur"]["alignment_coefficients"] = al_coef
-    fit.obsm["embedding"] = apply_linear_transformation(embedding, al_coef, design_matrix)
+    fit.obsm["embedding"] = _apply_linear_transformation(embedding, al_coef, design_matrix)
     return fit
 
 
-def align_impl(embedding, grouping, design_matrix, ridge_penalty = 0.01, calculate_new_embedding = True):
+def _align_impl(embedding, grouping, design_matrix, ridge_penalty = 0.01, calculate_new_embedding = True):
     if grouping.ndim == 1:
         raise ValueError("grouping must be a 2d array")
     else:
@@ -70,36 +70,36 @@ def align_impl(embedding, grouping, design_matrix, ridge_penalty = 0.01, calcula
     print(f"error: {np.linalg.norm((new_pos - embedding) - interact_design_matrix @ alignment_coefs)}")
     alignment_coefs = alignment_coefs.reshape((K, n_emb + 1, n_emb)).transpose((2, 1, 0))
     if calculate_new_embedding:
-        new_embedding = apply_linear_transformation(embedding, alignment_coefs, design_matrix)
+        new_embedding = _apply_linear_transformation(embedding, alignment_coefs, design_matrix)
         return alignment_coefs, new_embedding
     else:
         return alignment_coefs
     
 
-def apply_linear_transformation(embedding, alignment_coefs, design_matrix):
+def _apply_linear_transformation(embedding, alignment_coefs, design_matrix):
     des_row_groups, reduced_design_matrix, des_row_group_ids = row_groups(design_matrix, return_reduced_matrix=True,return_group_ids=True)
     embedding = embedding.copy()
     for id in des_row_group_ids:
         sel = des_row_groups == id
         embedding[sel,:] = np.hstack([np.ones((np.sum(sel),1)), embedding[sel,:]]) @ \
-            forward_linear_transformation(alignment_coefs, reduced_design_matrix[id,:]).T              
+            _forward_linear_transformation(alignment_coefs, reduced_design_matrix[id,:]).T              
     return embedding
 
-def forward_linear_transformation(alignment_coef, design_vector):
+def _forward_linear_transformation(alignment_coef, design_vector):
     n_emb = alignment_coef.shape[0]
     if n_emb == 0:
         return np.zeros((0, 0))
     else:
         return np.hstack([np.zeros((n_emb, 1)), np.eye(n_emb)]) + np.dot(alignment_coef, design_vector)
     
-def reverse_linear_transformation(alignment_coef, design_vector):
+def _reverse_linear_transformation(alignment_coef, design_vector):
     n_emb = alignment_coef.shape[0]
     if n_emb == 0:
         return np.zeros((0, 0))
     else:
         return np.linalg.inv(np.eye(n_emb) + np.dot(alignment_coef[:,1:,:], design_vector))
 
-def init_harmony(embedding, design_matrix, 
+def _init_harmony(embedding, design_matrix, 
                  theta = 2,
                  lamb = 1,
                  sigma = 0.1, 

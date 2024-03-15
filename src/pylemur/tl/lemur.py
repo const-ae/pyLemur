@@ -4,9 +4,9 @@ from collections.abc import Iterable, Mapping
 import numpy as np
 import anndata as ad
 
-from pylemur.tl.design_matrix_utils import *
-from pylemur.tl.grassmann_lm import grassmann_lm, project_data_on_diffemb
-from pylemur.tl.lin_alg_wrappers import *
+from pylemur.tl._design_matrix_utils import *
+from pylemur.tl._grassmann_lm import grassmann_lm, project_data_on_diffemb
+from pylemur.tl._lin_alg_wrappers import *
 
 
 

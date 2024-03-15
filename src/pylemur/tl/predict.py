@@ -4,10 +4,10 @@ import pandas as pd
 import numpy as np
 import formulaic
 import warnings
-from pylemur.tl.alignment import reverse_linear_transformation
+from pylemur.tl.alignment import _reverse_linear_transformation
 
-from pylemur.tl.design_matrix_utils import row_groups
-from pylemur.tl.grassmann import grassmann_map
+from pylemur.tl._design_matrix_utils import row_groups
+from pylemur.tl._grassmann import grassmann_map
 
 
 def predict(fit, 
@@ -42,7 +42,7 @@ def predict(fit,
     for id in des_row_group_ids:
         covars = reduced_design_matrix[id,:]
         subspace = grassmann_map(np.dot(coef, covars).T, fit.uns["lemur"]["base_point"].T)
-        alignment = reverse_linear_transformation(al_coefs, covars)
+        alignment = _reverse_linear_transformation(al_coefs, covars)
         offset = np.dot(al_coefs[:,0,:], covars)
         approx[des_row_groups == id, :] += ((embedding[des_row_groups == id, :] - offset) @ alignment) @ subspace.T
     

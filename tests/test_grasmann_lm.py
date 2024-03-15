@@ -1,9 +1,9 @@
 
 import numpy as np
 
-from pylemur.tl.grassmann import grassmann_angle_from_point, grassmann_map, grassmann_project
-from pylemur.tl.grassmann_lm import grassmann_geodesic_regression, grassmann_lm, project_data_on_diffemb, project_diffemb_into_data_space
-from pylemur.tl.lin_alg_wrappers import fit_pca
+from pylemur.tl._grassmann import grassmann_angle_from_point, grassmann_map, grassmann_project
+from pylemur.tl._grassmann_lm import grassmann_geodesic_regression, grassmann_lm, project_data_on_diffemb, project_diffemb_into_data_space
+from pylemur.tl._lin_alg_wrappers import fit_pca
 
 
 def test_geodesic_regression():
