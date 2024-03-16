@@ -20,6 +20,9 @@ def lemur(data: ad.AnnData,
           copy: bool = True,
           verbose: bool = True):
     """Fit the LEMUR model
+    
+    A python implementation of the LEMUR algorithm. For more details please refer
+    to Ahlmann-Eltze (2024).
 
     Parameters
     ----------

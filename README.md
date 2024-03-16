@@ -51,7 +51,11 @@ If you found a bug, please use the [issue tracker][issue-tracker].
 
 ## Citation
 
-> t.b.a
+> Ahlmann-Eltze C, Huber W ({cite:year}`Ahlmann-Eltze2024`). 
+“Analysis of multi-condition single-cell data with latent embedding multivariate regression.” bioRxiv. 
+doi:10.1101/2023.03.06.531268.
+
+
 
 [scverse-discourse]: https://discourse.scverse.org/
 [issue-tracker]: https://github.com/const-ae/pyLemur/issues

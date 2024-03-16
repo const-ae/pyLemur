@@ -30,6 +30,8 @@ repository_url = urls["Source"]
 release = info["Version"]
 
 bibtex_bibfiles = ["references.bib"]
+bibtex_default_style = 'unsrt'
+
 templates_path = ["_templates"]
 nitpicky = True  # Warn about broken links
 needs_sphinx = "4.0"
