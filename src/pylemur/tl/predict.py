@@ -77,7 +77,7 @@ def predict(fit,
         subspace = grassmann_map(np.dot(coef, covars).T, fit.uns["lemur"]["base_point"].T)
         alignment = _reverse_linear_transformation(al_coefs, covars)
         offset = np.dot(al_coefs[:,0,:], covars)
-        approx[des_row_groups == id, :] += ((embedding[des_row_groups == id, :] - offset) @ alignment) @ subspace.T
+        approx[des_row_groups == id, :] += ((embedding[des_row_groups == id, :] - offset) @ alignment.T) @ subspace.T
     
     return approx
 
