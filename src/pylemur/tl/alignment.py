@@ -1,6 +1,7 @@
 from typing import Union
 import harmonypy
 import numpy as np
+import pandas as pd
 
 from pylemur.tl._design_matrix_utils import row_groups
 from pylemur.tl._lin_alg_wrappers import multiply_along_axis, ridge_regression
@@ -40,7 +41,8 @@ def align_with_harmony(fit,
         # Update harmony
         harm_obj.cluster()
         # alignment <- align_impl(training_fit$embedding, harm_obj$R, act_design_matrix, ridge_penalty = ridge_penalty)
-        al_coef, new_emb = _align_impl(embedding, harm_obj.R, design_matrix, ridge_penalty = ridge_penalty, calculate_new_embedding = True)
+        al_coef, new_emb = _align_impl(embedding, harm_obj.R, design_matrix, ridge_penalty = ridge_penalty,
+                                        calculate_new_embedding = True, verbose = verbose)
         harm_obj.Z_corr = new_emb.T
         harm_obj.Z_cos = multiply_along_axis(new_emb, 1 / np.linalg.norm(new_emb, axis=1).reshape((new_emb.shape[0], 1)), axis = 1).T
 
@@ -53,19 +55,75 @@ def align_with_harmony(fit,
     return fit
 
 
-def _align_impl(embedding, grouping, design_matrix, ridge_penalty = 0.01, calculate_new_embedding = True):
+def align_with_grouping(fit,
+                        grouping: Union[list, np.ndarray, pd.Series],
+                        ridge_penalty: Union[float, list[float], np.ndarray]  = 0.01, 
+                        preserve_position_of_NAs: bool = False,
+                        verbose: bool = True):
+    """Fine-tune the embedding using annotated groups of cells.
+    
+    Parameters
+    ----------
+    fit
+        The AnnData object produced by `lemur`.
+    grouping
+        A list, numpy array, or pandas Series specifying the group of cells.
+        The groups span different conditions and can for example be cell types.
+    ridge_penalty
+        The penalty controlling the flexibility of the alignment.
+    preserve_position_of_NAs
+        `True` means that `NA`s in the `grouping` indicate that these cells should stay
+        where they are (if possible). `False` means that they are free to move around.
+    verbose
+        Whether to print progress to the console.
+
+    Returns
+    -------
+    :class:`~anndata.AnnData`
+        The input AnnData object with the updated embedding space stored in 
+        `data.obsm["embedding"]` and an the updated alignment coefficients
+        stored in `data.uns["lemur"]["alignment_coefficients"]`.
+    """
+    embedding = fit.obsm["embedding"].copy()
+    design_matrix = fit.uns["lemur"]["design_matrix"]
+    if isinstance(grouping, list):
+        grouping = pd.Series(grouping)
+    
+    if isinstance(grouping, pd.Series):
+        grouping = grouping.factorize()[0] * 1.0
+        grouping[grouping == -1] = np.nan
+
+    al_coef = _align_impl(embedding, grouping, design_matrix, ridge_penalty = ridge_penalty, 
+                          calculate_new_embedding = False, verbose = verbose)
+    fit.uns["lemur"]["alignment_coefficients"] = al_coef
+    fit.obsm["embedding"] = _apply_linear_transformation(embedding, al_coef, design_matrix)
+    return fit
+
+def _align_impl(embedding, grouping, design_matrix, ridge_penalty = 0.01,
+                preserve_position_of_NAs = False, calculate_new_embedding = True, verbose=True):
     if grouping.ndim == 1:
-        raise ValueError("grouping must be a 2d array")
+        uniq_elem, fct_levels = np.unique(grouping, return_inverse=True)
+        I = np.eye(len(uniq_elem))
+        I[:,np.isnan(uniq_elem)] = 0
+        grouping_matrix = I[:,fct_levels]
     else:
+        assert grouping.shape[1] == embedding.shape[0]
+        assert np.all(grouping[~np.isnan(grouping)] >= 0)
         col_sums = grouping.sum(axis=0)
         col_sums[col_sums == 0] = 1
         grouping_matrix = grouping / col_sums
     
-    # I could do something with NA's but the R code looks a bit complicated
-    
-    n_groups = grouping.shape[0]
+    n_groups = grouping_matrix.shape[0]
     n_emb = embedding.shape[1]
     K = design_matrix.shape[1]
+
+    # NA's are converted to zero columns ensuring that `diff %*% grouping_matrix = 0`
+    grouping_matrix[:,np.isnan(grouping_matrix.sum(axis=0))] = 0
+    if not preserve_position_of_NAs:
+        not_all_zero_column = grouping_matrix.sum(axis=0) != 0
+        grouping_matrix = grouping_matrix[:,not_all_zero_column]
+        embedding = embedding[not_all_zero_column,:]
+        design_matrix = design_matrix[not_all_zero_column]
 
     des_row_groups, des_row_group_ids = row_groups(design_matrix, return_group_ids=True)
     n_conditions = des_row_group_ids.shape[0]
@@ -73,25 +131,35 @@ def _align_impl(embedding, grouping, design_matrix, ridge_penalty = 0.01, calcul
     for id in des_row_group_ids:
         sel = des_row_groups == id
         for idx in range(n_groups):
-            cond_ct_means[id][:,idx] = np.average(embedding[sel,:], axis=0, weights=grouping_matrix[idx,sel])
+            if grouping_matrix[idx,sel].sum() > 0:
+                cond_ct_means[id][:,idx] = np.average(embedding[sel,:], axis=0, weights=grouping_matrix[idx,sel])
+            else:
+                cond_ct_means[id][:,idx] = np.nan
+
     
-    target = np.zeros((n_emb, n_groups))
+    target = np.zeros((n_emb, n_groups)) * np.nan
     for idx in range(n_groups):
         tmp = np.zeros((n_conditions, n_emb))
         for id in des_row_group_ids:
             tmp[id,:] = cond_ct_means[id][:,idx]
-        target[:,idx] = np.average(tmp, axis=0)
+        if np.all(np.isnan(tmp)):
+            target[:,idx] = np.nan
+        else:
+            target[:,idx] = np.average(tmp[:,~np.isnan(tmp.sum(axis=0))], axis=0)
 
     new_pos = embedding.copy()
     for id in des_row_group_ids:
         sel = des_row_groups==id
         diff = target - cond_ct_means[id]
+        # NA's are converted to zero so that they don't propagate.
+        diff[np.isnan(diff)] = 0 
         new_pos[sel,:] = new_pos[sel,:] + (diff @ grouping_matrix[:,sel]).T
 
     intercept_emb = np.hstack([np.ones((embedding.shape[0],1)), embedding])
     interact_design_matrix = np.repeat(design_matrix, n_emb + 1, axis = 1) * np.hstack([intercept_emb] * K)
     alignment_coefs = ridge_regression(new_pos - embedding, interact_design_matrix, ridge_penalty)
-    print(f"error: {np.linalg.norm((new_pos - embedding) - interact_design_matrix @ alignment_coefs)}")
+    if verbose:
+        print(f"Alignment error: {np.linalg.norm((new_pos - embedding) - interact_design_matrix @ alignment_coefs)}")
     alignment_coefs = alignment_coefs.reshape((K, n_emb + 1, n_emb)).transpose((2, 1, 0))
     if calculate_new_embedding:
         new_embedding = _apply_linear_transformation(embedding, alignment_coefs, design_matrix)
