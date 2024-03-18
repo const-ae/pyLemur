@@ -1,0 +1,74 @@
+---
+title: "Kang analysis with R"
+format: html
+---
+
+
+```{r}
+library(tidyverse)
+library(SingleCellExperiment)
+```
+
+
+```{r}
+sce <- zellkonverter::readH5AD("data/kang_2018.h5ad", X_name = "counts")
+```
+
+```{r}
+logcounts(sce) <- transformGamPoi::shifted_log_transform(counts(sce))
+hvgs <- order(-rowVars(logcounts(sce)))
+sce <- sce[hvgs[1:1000],]
+```
+
+```{r}
+system.time({
+    fit <- lemur::lemur(sce, design = ~ label, n_embedding = 15, verbose = TRUE, test_fraction = 0)
+})
+
+fit$embedding[1:3, 1:3]
+fit$embedding[1:3, 24601:24603]
+
+
+# fit <- lemur::align_harmony(fit)
+
+# groups <- rep(NA, ncol(fit))
+# groups[fit$colData$cell_type == "CD4 T cells"] <- 1
+# groups[fit$colData$cell_type == "NK cells"] <- 2
+# groups[fit$colData$cell_type == "Dendritic cells"] <- 3
+groups <- fit$colData$cell_type
+groups[c(1,10,100)] <- NA
+
+fit <- lemur::align_by_grouping(fit, groups)
+
+fit$embedding[1:3, 1:3]
+fit$embedding[1:3, 24601:24603]
+
+
+pred_ctrl <- predict(fit, newcondition = cond(label = "ctrl"))
+pred_ctrl[1:3, 1:3]
+```
+
+
+```{r}
+py_pred <- t(as.matrix(readr::read_tsv("/var/folders/dc/tppjxs9x6ll378lq88lz1fm40000gq/T//Rtmpm5PTRh/pred_ctrl.tsv", col_names = FALSE)))    
+dimnames(py_pred) <- dimnames(fit)
+plot(py_pred[1,], pred_ctrl[1,])
+```
+
+
+```{r}
+py_emb <- t(as.matrix(readr::read_tsv("/var/folders/dc/tppjxs9x6ll378lq88lz1fm40000gq/T//Rtmpm5PTRh/embedding.tsv", col_names = FALSE)))    
+dimnames(py_emb) <- dimnames(fit$embedding)
+plot(py_emb[1,], fit$embedding[1,])
+```
+
+```{r}
+as_tibble(colData(fit)) %>%
+    mutate(r_emb = t(fit$embedding),
+           py_emb = t(py_emb)) %>%
+    pivot_longer(ends_with("emb"), names_sep = "_", names_to = c("origin", ".value")) %>%
+    ggplot(aes(x = emb[,4], y = emb[,15])) +
+        geom_point(aes(color = label)) +
+        facet_wrap(vars(origin))
+
+```

@@ -54,16 +54,7 @@ log_mat = shifted_log_transform(mat)
 
 ```{python}
 # shifted log transformation ala transformGamPoi
-def shifted_log_transform(counts, overdispersion = 0.05, pseudo_count = None, minimum_overdispersion = 0.001):
-    if pseudo_count is None:
-        pseudo_count = 1/(4 * overdispersion)
 
-    size_factors = mat.sum(axis=1)
-    size_factors = size_factors / np.exp(np.mean(np.log(size_factors)))
-    norm_mat = mat / size_factors.reshape((n_cells, 1))
-    overdispersion = 1/(4 * pseudo_count)
-    res = 1/np.sqrt(overdispersion) * np.log1p(4 * overdispersion * norm_mat)
-    return res
 ```
 
 
