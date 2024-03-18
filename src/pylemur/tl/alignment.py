@@ -80,7 +80,7 @@ def _align_impl(embedding, grouping, design_matrix, ridge_penalty = 0.01, calcul
         tmp = np.zeros((n_conditions, n_emb))
         for id in des_row_group_ids:
             tmp[id,:] = cond_ct_means[id][:,idx]
-        target[:,idx] = tmp.sum(axis=0)
+        target[:,idx] = np.average(tmp, axis=0)
 
     new_pos = embedding.copy()
     for id in des_row_group_ids:
