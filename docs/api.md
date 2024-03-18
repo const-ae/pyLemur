@@ -23,6 +23,7 @@ To run `lemur` use the following call.
 
     pylemur.tl.lemur
     pylemur.tl.align_with_harmony
+    pylemur.tl.align_with_grouping
     pylemur.tl.predict
     pylemur.tl.cond
 ```

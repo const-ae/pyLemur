@@ -72,7 +72,7 @@ def align_with_grouping(fit,
     ridge_penalty
         The penalty controlling the flexibility of the alignment.
     preserve_position_of_NAs
-        `True` means that `NA`s in the `grouping` indicate that these cells should stay
+        `True` means that `NA`'s in the `grouping` indicate that these cells should stay
         where they are (if possible). `False` means that they are free to move around.
     verbose
         Whether to print progress to the console.
