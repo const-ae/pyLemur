@@ -2,11 +2,15 @@
 title: pyLemur Walkthrough
 date: today
 authors: Constantin Ahlmann-Eltze
+bibliography: ../references.bib
 format: 
     ipynb:
         toc: true
         fig-format: retina
         df-print: default
+        standalone: false
+execute: 
+  enabled: true
 jupyter: python3
 ---
 
@@ -15,13 +19,126 @@ The goal of `pyLemur` is to simplify analysis of multi-condition single-cell dat
 
 `pyLemur` is a Python implementation of the LEMUR model; there is also an `R` package called [lemur](https://bioconductor.org/packages/lemur/) which provides additional functionality: identifying neighborhoods of cells that show consistent differential expression values and a pseudo-bulk test to validate the findings.
 
-`pyLemur` implements a novel framework to disentangle the effects of known covariates, latent cell states, and their interactions. At the core, is a combination of matrix factorization and regression analysis implemented as geodesic regression on Grassmann manifolds. We call this latent embedding multivariate regression. For more details see our [preprint](https://www.biorxiv.org/content/10.1101/2023.03.06.531268).
+`pyLemur` implements a novel framework to disentangle the effects of known covariates, latent cell states, and their interactions. At the core, is a combination of matrix factorization and regression analysis implemented as geodesic regression on Grassmann manifolds. We call this latent embedding multivariate regression. For more details see our [preprint](https://www.biorxiv.org/content/10.1101/2023.03.06.531268) [@Ahlmann-Eltze2024].
 
-![Schematic of the matrix decomposition at
-the core of LEMUR](../_static/equation_schematic.png)
-
+<img src="../_static/images/equation_schematic.png" alt="Schematic of the matrix decomposition atthe core of LEMUR" />
 
 
+## Data
+
+For demonstration, I will use the a dataset of interferon-$\beta$ stimuted blood cells from @kang2018.
+
+```{python}
+#| label: import-data
+#| warning: false
+# Standard imports
+import numpy as np
+import scanpy as sc
+# pertpy is need to download the kang data
+import pertpy 
+
+# This will download the data to ./data/kang_2018.h5ad
+adata = pertpy.data.kang_2018()
+# Store counts separately in the layers
+adata.layers["counts"] = adata.X.copy()
+```
+
+The data consist of $24\,673$ cells and $15\,706$ genes. The cells were measured in two conditions (`label="ctrl"` and `label="stim"`). The authors have annotated the cell type for each cell. This will be useful to analyze LEMUR's results, but the cell type labels are not actually used to the LEMUR model.
+
+```{python}
+#| label: pandas-print-settings
+#| echo: false
+import pandas as pd
+pd.options.display.width = 200
+pd.options.display.max_colwidth = 20
+```
+
+```{python}
+#| label: data-overview
+print(adata)
+print(adata.obs)
+```
+
+## Preprocessing
+
+LEMUR expects that the input has been variance-stabilized. Here, I will use the log-transformation as a simple, yet effective approach.
+In addition, I will select the $1\,000$ most variable genes, to make the results easier to manage.
+```{python}
+#| label: standard-preprocessing
+# This follows the standard recommendation from scanpy 
+sc.pp.normalize_total(adata, target_sum = 1e4, inplace=True)
+sc.pp.log1p(adata)
+adata.layers["logcounts"] = adata.X.copy()
+sc.pp.highly_variable_genes(adata, n_top_genes=1000, flavor="cell_ranger")
+adata = adata[:, adata.var.highly_variable]
+adata
+```
+
+If we make a dimensional-embedding of the data using UMAP, we see that the cell types split-up by treatment status.
+```{python}
+#| label: raw-umap
+sc.tl.pca(adata)
+sc.pp.neighbors(adata)
+sc.tl.umap(adata)
+sc.pl.umap(adata, color=["label", "cell_type"])
+```
 
 
+## LEMUR
+
+First, we import `pyLemur`; then, we fit the LEMUR model by providing the `AnnData` object, a specification of the experimental design, and the number of latent dimensions.
+
+```{python}
+#| label: fit-lemur
+import pylemur
+fit = pylemur.tl.lemur(adata, design = "~ label", n_embedding=15)
+fit = pylemur.tl.align_with_harmony(fit)
+```
+
+To assess the success of the LEMUR model fit, we plot a UMAP representation of the embedding calculated by LEMUR. Here, the two conditions are mixed and the different cell types and cell states drive the visible variation.
+```{python}
+#| label: fit-lemur
+# Recalculate the UMAP embedding on calculated by LEMUR
+sc.pp.neighbors(fit, use_rep="embedding")
+sc.tl.umap(fit)
+sc.pl.umap(fit, color=["label", "cell_type"])
+```
+
+The LEMUR model is fully parametric, which means that we can predict for each cell what it's expression would have been in any condition (i.e., for a cell observed in the control condition, we can predict its expression under treatment), as a function of its low-dimensional embedding.
+
+```{python}
+ctrl_pred = pylemur.tl.predict(fit, new_condition=pylemur.tl.cond(fit, label="ctrl"))
+stim_pred = pylemur.tl.predict(fit, new_condition=pylemur.tl.cond(fit, label="stim"))
+```
+
+
+
+```{python}
+import matplotlib.pyplot as plt
+fit.layers["diff"] = ctrl_pred - stim_pred
+sel_gene = "TNFRSF18"
+
+_,axs = plt.subplots(nrows = 1, ncols = 3)
+sc.pl.umap(fit, layer="diff", color=[sel_gene], cmap = plt.get_cmap("seismic"), vcenter=0,
+    vmin = -0.5, vmax =0.5, title="Predicted difference (ctrl - stim)", ax=axs[0], show=False)
+sc.pl.umap(fit[fit.obs["label"]=="ctrl"], layer="logcounts", color=[sel_gene], vmin = 0, vmax =4,
+    title="Gene expression in ctrl condition of " + sel_gene, ax=axs[1], show=False)
+sc.pl.umap(fit[fit.obs["label"]=="stim"], layer="logcounts", color=[sel_gene], vmin = 0, vmax =4,
+    title="Gene expression in stim condition of " + sel_gene, ax=axs[2])
+```
+
+### Session Info
+
+```{python}
+#| label: session-info
+#| code-fold: true
+import session_info
+session_info.show()
+```
+
+
+### References
+
+::: {#refs}
+:::
 
