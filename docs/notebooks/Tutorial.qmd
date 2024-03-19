@@ -92,7 +92,7 @@ First, we import `pyLemur`; then, we fit the LEMUR model by providing the `AnnDa
 #| label: fit-lemur
 import pylemur
 fit = pylemur.tl.lemur(adata, design = "~ label", n_embedding=15)
-fit = pylemur.tl.align_with_harmony(fit)
+fit = pylemur.tl.align_with_harmony(fit, verbose=False)
 ```
 
 To assess the success of the LEMUR model fit, we plot a UMAP representation of the embedding calculated by LEMUR. Here, the two conditions are mixed and the different cell types and cell states drive the visible variation.
