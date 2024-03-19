@@ -8,11 +8,7 @@
 [link-docs]: https://pyLemur.readthedocs.io
 [badge-docs]: http://readthedocs.org/projects/pylemur/badge
 
-The Python implementation of the LEMUR method to analyze multi-condition single-cell data. For the more complete version in R, see https://github.com/const-ae/lemur.
-
-# Disclaimer
-
-This is an early alpha version of the code, that is insufficiently documented and has not been extensively tested. I hope to make the implementation more robust and then make it available on PyPI in the coming weeks. Until then, use it at your own risk! 
+The Python implementation of the LEMUR method to analyze multi-condition single-cell data. For the more complete version in R, see [github.com/const-ae/lemur](https://github.com/const-ae/lemur). To learn more check-out the [function documentation](https://pylemur.readthedocs.io/page/api.html) and the [tutorial](https://pylemur.readthedocs.io/page/Tutorial.html) at [pylemur.readthedocs.io](https://pylemur.readthedocs.io). To check-out the source code or submit an issue go to [github.com/const-ae/pyLemur](https://github.com/const-ae/pyLemur)
 
 
 
@@ -45,7 +41,7 @@ pip install git+https://github.com/const-ae/pyLemur.git@main
 
 ## Documentation
 
-For more information on the functions see the [API docs](https://pyLemur.readthedocs.io/page/api.html).
+For more information on the functions see the [API docs](https://pyLemur.readthedocs.io/page/api.html) and the [tutorial](https://pylemur.readthedocs.io/page/Tutorial.html).
 
 ## Contact
 
