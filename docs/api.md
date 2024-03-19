@@ -1,15 +1,5 @@
 # API
 
-## Preprocessing
-
-```{eval-rst}
-.. module:: pylemur.pp
-.. currentmodule:: pylemur
-
-.. autosummary::
-    :toctree: generated
-```
-
 ## Tools
 
 To run `lemur` use the following call.
@@ -28,13 +18,3 @@ To run `lemur` use the following call.
     pylemur.tl.cond
 ```
 
-## Plotting
-
-```{eval-rst}
-.. module:: pylemur.pl
-.. currentmodule:: pylemur
-
-.. autosummary::
-    :toctree: generated
-
-```
