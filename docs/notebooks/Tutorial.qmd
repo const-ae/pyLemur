@@ -76,7 +76,7 @@ adata
 
 If we make a dimensional-embedding of the data using UMAP, we see that the cell types split-up by treatment status.
 ```{python}
-#| label: raw-umap
+#| label: fig-raw-umap
 sc.tl.pca(adata)
 sc.pp.neighbors(adata)
 sc.tl.umap(adata)
@@ -97,7 +97,7 @@ fit = pylemur.tl.align_with_harmony(fit)
 
 To assess the success of the LEMUR model fit, we plot a UMAP representation of the embedding calculated by LEMUR. Here, the two conditions are mixed and the different cell types and cell states drive the visible variation.
 ```{python}
-#| label: fit-lemur
+#| label: fig-plot-lemur
 # Recalculate the UMAP embedding on calculated by LEMUR
 sc.pp.neighbors(fit, use_rep="embedding")
 sc.tl.umap(fit)
@@ -107,25 +107,74 @@ sc.pl.umap(fit, color=["label", "cell_type"])
 The LEMUR model is fully parametric, which means that we can predict for each cell what it's expression would have been in any condition (i.e., for a cell observed in the control condition, we can predict its expression under treatment), as a function of its low-dimensional embedding.
 
 ```{python}
+#| label: predict-expression
 ctrl_pred = pylemur.tl.predict(fit, new_condition=pylemur.tl.cond(fit, label="ctrl"))
 stim_pred = pylemur.tl.predict(fit, new_condition=pylemur.tl.cond(fit, label="stim"))
 ```
 
-
-
+We can now check the predicted differential expression against the underlying observed expression patterns for individual genes.
 ```{python}
+#| label: fig-example-gene-expr
 import matplotlib.pyplot as plt
-fit.layers["diff"] = ctrl_pred - stim_pred
+fit.layers["diff"] = stim_pred - ctrl_pred
 sel_gene = "TNFRSF18"
 
 _,axs = plt.subplots(nrows = 1, ncols = 3)
 sc.pl.umap(fit, layer="diff", color=[sel_gene], cmap = plt.get_cmap("seismic"), vcenter=0,
-    vmin = -0.5, vmax =0.5, title="Predicted difference (ctrl - stim)", ax=axs[0], show=False)
+    vmin = -0.5, vmax =0.5, title="Pred diff (ctrl - stim)", ax=axs[0], show=False)
 sc.pl.umap(fit[fit.obs["label"]=="ctrl"], layer="logcounts", color=[sel_gene], vmin = 0, vmax =4,
-    title="Gene expression in ctrl condition of " + sel_gene, ax=axs[1], show=False)
+    title="Ctrl expr", ax=axs[1], show=False)
 sc.pl.umap(fit[fit.obs["label"]=="stim"], layer="logcounts", color=[sel_gene], vmin = 0, vmax =4,
-    title="Gene expression in stim condition of " + sel_gene, ax=axs[2])
+    title="Stim expr", ax=axs[2])
 ```
+
+To assess the overall accuracy of LEMUR's predictions, I compare the average prediction per cell type across conditions. Genes on the diagonal don't change expression much between conditions, whereas all genes off-diagonal show differential expression within a cell type:
+```{python}
+#| label: fig-pred-raw
+def rowMeans_per_group(X, group):
+    uniq = np.unique(group)
+    res = np.zeros((len(uniq), X.shape[1]))
+    for i, e in enumerate(uniq):
+        res[i,:] = X[group == e,:].sum(axis=0) / sum(group == e)
+    return res
+
+fit_ctrl = fit[fit.obs["label"] == "ctrl",:]
+fit_stim = fit[fit.obs["label"] == "stim",:]
+ctrl_expr_per_cell_type = rowMeans_per_group(fit_ctrl.layers["logcounts"], fit_ctrl.obs["cell_type"])
+stim_expr_per_cell_type = rowMeans_per_group(fit_stim.layers["logcounts"], fit_stim.obs["cell_type"])
+obs_diff = stim_expr_per_cell_type - ctrl_expr_per_cell_type
+plt.scatter(ctrl_expr_per_cell_type, stim_expr_per_cell_type, c = obs_diff,
+    cmap = plt.get_cmap("seismic"), vmin=-5, vmax=5, marker="o",edgecolors= "black")
+plt.colorbar()
+plt.title( "Inf-b stim. increases gene expression for many genes")
+plt.axline((0, 0), (1, 1), linewidth=1, color='black')
+```
+
+Too check how well LEMUR learned the underlying expression relations, I predict the expression of cells from the control condition under stimulation, against the observed expression in the stimulated condition.
+```{python}
+#| label: fig-pred-accuracy
+stim_pred_per_cell_type = rowMeans_per_group(stim_pred[fit.obs["label"]=="ctrl"], fit_ctrl.obs["cell_type"])
+
+plt.scatter(stim_expr_per_cell_type, stim_pred_per_cell_type, c = obs_diff,
+    cmap = plt.get_cmap("seismic"), vmin=-5, vmax=5, marker="o",edgecolors= "black")
+plt.colorbar()
+plt.title( "LEMUR's expression predictions are accurate")
+plt.axline((0, 0), (1, 1), linewidth=1, color='black')
+```
+
+Lastly, I diretly, compare the predicted differential expression against the observed differential expression per cell type.
+
+```{python}
+#| label: fig-de-accuracy
+pred_diff = rowMeans_per_group(fit.layers["diff"], fit.obs["cell_type"])
+
+plt.scatter(obs_diff, pred_diff, c = obs_diff,
+    cmap = plt.get_cmap("seismic"), vmin=-5, vmax=5, marker="o",edgecolors= "black")
+plt.colorbar()
+plt.title( "LEMUR's DE predictions are accurate")
+plt.axline((0, 0), (1, 1), linewidth=1, color='black')
+```
+
 
 ### Session Info
 
