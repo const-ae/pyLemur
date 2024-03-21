@@ -26,13 +26,13 @@ You need to have Python 3.9 or newer installed on your system.
 There are several alternative options to install pyLemur:
 
 
-Install the latest release of `pyLemur` from `PyPI <https://pypi.org/project/pyLemur/>`_:
+Install the latest release of `pyLemur` from [PyPI](https://pypi.org/project/pyLemur/):
 ```bash
 pip install pyLemur
 ```
 
 
-Alternatively, install the latest development version:
+Alternatively, install the latest development version directly from Github:
 ```bash
 pip install git+https://github.com/const-ae/pyLemur.git@main
 ```
