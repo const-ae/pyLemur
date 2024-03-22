@@ -1,12 +1,12 @@
 import numpy as np
 from pylemur.tl._grassmann import *
 
+
 def test_grassmann_map():
     # Test case 1: empty base point
     x = np.array([[1, 2], [3, 4], [5, 6]])
     p = np.array([])
     assert np.array_equal(grassmann_map(x, p), p)
-
 
     # Test case 2: x contains NaN values
     x = np.array([[1, 2], [3, np.nan], [5, 6]])

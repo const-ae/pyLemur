@@ -1,4 +1,4 @@
-import numpy as np 
+import numpy as np
 
 
 def grassmann_map(x, base_point):
@@ -8,8 +8,9 @@ def grassmann_map(x, base_point):
         # Return an object with the same shape as x filled with nan
         return np.full(x.shape, np.nan)
     else:
-        u, s, vt = np.linalg.svd(x, full_matrices = False)
+        u, s, vt = np.linalg.svd(x, full_matrices=False)
         return (base_point @ vt.T) @ np.diag(np.cos(s)) @ vt + u @ np.diag(np.sin(s)) @ vt
+
 
 def grassmann_log(p, q):
     n = p.shape[0]
@@ -26,28 +27,34 @@ def grassmann_log(p, q):
         u = u[:, :k]
         s = s[:k]
         vt = vt[:k, :]
-        return u @ np.diag(np.arctan(s)) @ vt     
+        return u @ np.diag(np.arctan(s)) @ vt
+
 
 def grassmann_project(x):
     return np.linalg.qr(x)[0]
 
+
 def grassmann_project_tangent(x, base_point):
     return x - base_point @ base_point.T @ x
+
 
 def grassmann_random_point(n, k):
     x = np.random.randn(n, k)
     return grassmann_project(x)
 
+
 def grassmann_random_tangent(base_point):
     x = np.random.randn(*base_point.shape)
     return grassmann_project_tangent(x, base_point)
 
-def grassmann_angle_from_tangent(x, normalized = True):
-    thetas = np.linalg.svd(x, full_matrices = True, compute_uv=False) / np.pi * 180
+
+def grassmann_angle_from_tangent(x, normalized=True):
+    thetas = np.linalg.svd(x, full_matrices=True, compute_uv=False) / np.pi * 180
     if normalized:
-            return np.minimum(thetas, 180 - thetas).max()
+        return np.minimum(thetas, 180 - thetas).max()
     else:
         return thetas[0]
-    
+
+
 def grassmann_angle_from_point(x, y):
     return grassmann_angle_from_tangent(grassmann_log(y, x))

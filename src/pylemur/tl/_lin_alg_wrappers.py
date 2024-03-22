@@ -2,10 +2,12 @@ import sklearn.decomposition as skd
 from typing import NamedTuple
 import numpy as np
 
+
 class PCA(NamedTuple):
     embedding: np.ndarray
     coord_system: np.ndarray
     offset: np.ndarray
+
 
 def fit_pca(Y, n, center=True):
     """
@@ -29,14 +31,14 @@ def fit_pca(Y, n, center=True):
         coord_system = pca.components_
         mean = pca.mean_
     else:
-        svd = skd.TruncatedSVD(n_components=n, algorithm='arpack')
+        svd = skd.TruncatedSVD(n_components=n, algorithm="arpack")
         emb = svd.fit_transform(Y)
-        coord_system =  svd.components_
+        coord_system = svd.components_
         mean = np.zeros(Y.shape[1])
     return PCA(emb, coord_system, mean)
 
 
-def ridge_regression(Y, X, ridge_penalty = 0, weights = None):
+def ridge_regression(Y, X, ridge_penalty=0, weights=None):
     """
     Calculate the ridge regression of a given data matrix Y.
     Parameters
@@ -71,7 +73,7 @@ def ridge_regression(Y, X, ridge_penalty = 0, weights = None):
         pass
     else:
         raise ValueError("ridge_penalty must be a scalar, 1d array, or 2d array")
-        
+
     ridge_penalty_sq = np.sqrt(np.sum(weights)) * (ridge_penalty.T @ ridge_penalty)
     weights_sqrt = np.sqrt(weights)
     X_ext = np.vstack([multiply_along_axis(X, weights_sqrt, 0), ridge_penalty_sq])
@@ -79,6 +81,7 @@ def ridge_regression(Y, X, ridge_penalty = 0, weights = None):
 
     ridge = np.linalg.lstsq(X_ext, Y_ext, rcond=None)[0]
     return ridge
+
 
 def multiply_along_axis(A, B, axis):
     # Copied from https://stackoverflow.com/a/71750176/604854

@@ -1,6 +1,7 @@
 from collections.abc import Mapping
 import numpy as np
 import pandas as pd
+
 # import patsy
 from formulaic import model_matrix
 
@@ -10,6 +11,7 @@ def handle_data(data, layer):
     if not isinstance(Y, np.ndarray):
         Y = Y.toarray()
     return Y
+
 
 def handle_design_parameter(design, obs_data):
     if isinstance(design, np.ndarray):
@@ -30,14 +32,15 @@ def handle_design_parameter(design, obs_data):
         design_matrix, design_formula = convert_formula_to_design_matrix(design, obs_data)
     else:
         raise ValueError("design must be a 2d array or string")
-    
+
     return design_matrix, design_formula
+
 
 def handle_obs_data(adata, obs_data):
     a = make_data_frame(adata.obs)
-    b = make_data_frame(obs_data, preferred_index = a.index if a is not None else None)
+    b = make_data_frame(obs_data, preferred_index=a.index if a is not None else None)
     if a is None and b is None:
-        return pd.DataFrame(index = pd.RangeIndex(0, adata.shape[0]))
+        return pd.DataFrame(index=pd.RangeIndex(0, adata.shape[0]))
     elif a is None:
         return b
     elif b is None:
@@ -45,14 +48,15 @@ def handle_obs_data(adata, obs_data):
     else:
         return pd.concat([a, b], axis=1)
 
-def make_data_frame(data, preferred_index = None):
+
+def make_data_frame(data, preferred_index=None):
     if data is None:
         return None
     if isinstance(data, pd.DataFrame):
         return data
     elif isinstance(data, Mapping):
-        return pd.DataFrame(data, index = preferred_index)
-    else: 
+        return pd.DataFrame(data, index=preferred_index)
+    else:
         raise ValueError("data must be None, a pandas DataFrame or a Mapping object")
 
 
@@ -67,8 +71,8 @@ def convert_formula_to_design_matrix(formula, obs_data):
         raise ValueError("formula must be a string")
 
 
-def row_groups(matrix, return_reduced_matrix = False, return_group_ids = False):
-    reduced_matrix, inv = np.unique(matrix, axis = 0, return_inverse=True)
+def row_groups(matrix, return_reduced_matrix=False, return_group_ids=False):
+    reduced_matrix, inv = np.unique(matrix, axis=0, return_inverse=True)
     group_ids = np.unique(inv)
     if return_reduced_matrix and return_group_ids:
         return inv, reduced_matrix, group_ids
