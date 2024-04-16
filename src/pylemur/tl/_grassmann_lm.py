@@ -1,4 +1,5 @@
 import numpy as np
+
 from pylemur.tl._design_matrix_utils import row_groups
 from pylemur.tl._grassmann import grassmann_log, grassmann_map
 from pylemur.tl._lin_alg_wrappers import fit_pca, ridge_regression
@@ -18,7 +19,7 @@ def grassmann_geodesic_regression(coord_systems, design, base_point, weights=Non
     weights : array-like, shape (n_groups,)
 
     Returns
-    ----------
+    -------
     beta: array-like, shape (n_emb, n_features, n_coef)
     """
     n_obs = design.shape[0]
@@ -33,7 +34,7 @@ def grassmann_geodesic_regression(coord_systems, design, base_point, weights=Non
         weights = np.ones(n_obs)
 
     tangent_vecs = [
-        grassmann_log(base_point.T, coord_systems[i].T).T.reshape((n_emb * n_features)) for i in range(n_obs)
+        grassmann_log(base_point.T, coord_systems[i].T).T.reshape(n_emb * n_features) for i in range(n_obs)
     ]
     tangent_vecs = np.vstack(tangent_vecs)
     if tangent_vecs.shape[0] == 0:
@@ -48,6 +49,7 @@ def grassmann_geodesic_regression(coord_systems, design, base_point, weights=Non
 def grassmann_lm(Y, design_matrix, base_point):
     """
     Solve Sum_i||Y_i: - Y_i: Proj(Exp_p(Sum_k V_k:: * X_ik))||^2 for V.
+
     Parameters
     ----------
     Y : array-like, shape (n_samples, n_features)
@@ -56,6 +58,7 @@ def grassmann_lm(Y, design_matrix, base_point):
         The design matrix.
     base_point : array-like, shape (n_emb, n_features)
         The base point.
+
     Returns
     -------
     beta: array-like, shape (n_emb, n_features, n_coef)

@@ -1,18 +1,23 @@
 import re
-from typing import Any, Literal, Union
-from collections.abc import Iterable, Mapping
 import warnings
+from collections.abc import Iterable, Mapping
+from typing import Any, Literal, Union
+
+import anndata as ad
 import formulaic
 import numpy as np
-import anndata as ad
 from sklearn.exceptions import NotFittedError
 
 from pylemur.tl._design_matrix_utils import *
-from pylemur.tl._grassmann_lm import grassmann_lm, project_data_on_diffemb
 from pylemur.tl._grassmann import grassmann_map
+from pylemur.tl._grassmann_lm import grassmann_lm, project_data_on_diffemb
 from pylemur.tl._lin_alg_wrappers import *
-from pylemur.tl.alignment import _align_impl, _apply_linear_transformation, _init_harmony, _reverse_linear_transformation
-
+from pylemur.tl.alignment import (
+    _align_impl,
+    _apply_linear_transformation,
+    _init_harmony,
+    _reverse_linear_transformation,
+)
 
 
 class LEMUR:
@@ -122,7 +127,6 @@ class LEMUR:
         `self`
             The fitted LEMUR model.
         """
-        
         Y = self.data_matrix
         design_matrix = self.design_matrix
         n_embedding = self.n_embedding
@@ -154,7 +158,7 @@ class LEMUR:
         self.linear_coefficients = lin_coef
 
         return self
-    
+
     def align_with_harmony(
         self, ridge_penalty: Union[float, list[float], np.ndarray] = 0.01, max_iter: int = 10, verbose: bool = True
     ):
@@ -287,7 +291,7 @@ class LEMUR:
         design_matrix, _ = handle_design_parameter(self.formula, adata.obs)
         dm = design_matrix.to_numpy()
         Y_clean = Y - dm @ self.linear_coefficients
-        embedding = project_data_on_diffemb(Y_clean, design_matrix = dm, coefficients = self.coefficients, 
+        embedding = project_data_on_diffemb(Y_clean, design_matrix = dm, coefficients = self.coefficients,
                                             base_point = self.base_point)
         embedding = _apply_linear_transformation(embedding, self.alignment_coefficients, dm)
         if return_type == "embedding":
@@ -298,7 +302,7 @@ class LEMUR:
             fit.design_matrix = design_matrix
             fit.embedding = embedding
             return fit
-    
+
 
     def predict(self,
         embedding: Union[np.ndarray, None] = None,
@@ -334,7 +338,6 @@ class LEMUR:
         array-like, shape (n_cells, n_genes)
             The predicted expression of the cells in the new condition.
         """
-
         if embedding is None:
             if self.embedding is None:
                 raise NotFittedError("The model has not been fitted yet.")
@@ -443,13 +446,13 @@ class LEMUR:
         df = pd.DataFrame([kwargs])
 
         return design_matrix.model_spec.get_model_matrix(df)
-    
+
     def __str__(self):
         if self.embedding is None:
             return f"LEMUR model (not fitted yet) with {self.n_embedding} dimensions"
         else:
             return f"LEMUR model with {self.n_embedding} dimensions"
-        
+
 
 
 def order_axis_by_variance(embedding, coefficients, base_point):

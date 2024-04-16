@@ -1,13 +1,8 @@
-from typing import Union
 import harmonypy
 import numpy as np
-import pandas as pd
 
 from pylemur.tl._design_matrix_utils import row_groups
-from pylemur.tl._lin_alg_wrappers import multiply_along_axis, ridge_regression
-
-
-
+from pylemur.tl._lin_alg_wrappers import ridge_regression
 
 
 def _align_impl(

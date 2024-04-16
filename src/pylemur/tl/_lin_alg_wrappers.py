@@ -1,6 +1,7 @@
-import sklearn.decomposition as skd
 from typing import NamedTuple
+
 import numpy as np
+import sklearn.decomposition as skd
 
 
 class PCA(NamedTuple):
@@ -12,6 +13,7 @@ class PCA(NamedTuple):
 def fit_pca(Y, n, center=True):
     """
     Calculate the PCA of a given data matrix Y.
+
     Parameters
     ----------
     Y : array-like, shape (n_samples, n_features)
@@ -20,6 +22,7 @@ def fit_pca(Y, n, center=True):
         The number of principal components to return.
     center : bool, default=True
         If True, the data will be centered before computing the covariance matrix.
+
     Returns
     -------
     pca : sklearn.decomposition.PCA
@@ -41,6 +44,7 @@ def fit_pca(Y, n, center=True):
 def ridge_regression(Y, X, ridge_penalty=0, weights=None):
     """
     Calculate the ridge regression of a given data matrix Y.
+
     Parameters
     ----------
     Y : array-like, shape (n_samples, n_features)
@@ -51,6 +55,7 @@ def ridge_regression(Y, X, ridge_penalty=0, weights=None):
         The ridge penalty.
     weights : array-like, shape (n_features,)
         The weights to apply to each feature.
+
     Returns
     -------
     ridge: array-like, shape (n_coef, n_features)
