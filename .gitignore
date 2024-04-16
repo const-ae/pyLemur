@@ -62,3 +62,8 @@ __pycache__/
 # IDEs
 /.idea/
 /.vscode/
+
+# Data files from tutorial
+docs/notebooks/data/*
+
+
