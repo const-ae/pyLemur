@@ -73,6 +73,8 @@ napoleon_numpy_docstring = True
 napoleon_include_init_with_doc = False
 napoleon_use_rtype = True  # having a separate entry generally helps readability
 napoleon_use_param = True
+napoleon_use_ivar = True
+
 
 myst_heading_anchors = 6  # create anchors for h1-h6
 myst_enable_extensions = [
@@ -85,7 +87,7 @@ myst_enable_extensions = [
 ]
 myst_url_schemes = ("http", "https", "mailto")
 nb_output_stderr = "remove"
-nb_execution_mode = "off"
+nb_execution_mode = "auto"
 nb_merge_streams = True
 typehints_defaults = "braces"
 
@@ -102,6 +104,7 @@ intersphinx_mapping = {
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "sklearn": ("https://scikit-learn.org/stable/", None),
+    # "formulaic": ("https://matthewwardrop.github.io/formulaic/", None) # Doesn't work.
 }
 
 

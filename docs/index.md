@@ -7,7 +7,7 @@
 :maxdepth: 1
 
 api.md
-notebooks/Tutorial.ipynb
+notebooks/Tutorial.myst
 changelog.md
 references.md
 

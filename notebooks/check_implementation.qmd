@@ -46,13 +46,15 @@ adata = adata[:, pylemur.pp.basic.get_top_hvgs(adata, layer="logcounts", n=1000)
 
 ```{python}
 import pylemur
-fit = pylemur.tl.lemur(adata, design = "~ label", n_embedding=15, layer = "logcounts")
-# fit = pylemur.tl.align_with_harmony(fit)
+model = pylemur.tl.LEMUR(adata, design = "~ label", n_embedding=15, layer = "logcounts")
+model.fit()
+model.align_with_harmony()
+print(model)
 ```
 
 ```{python}
-fit.obsm["embedding"][0:3, 0:3].T
-fit.obsm["embedding"][24600:24603,0:3].T
+model.embedding.shape
+model.adata
 ```
 
 ```{python}

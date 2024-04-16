@@ -2,7 +2,7 @@
 
 ## Tools
 
-To run `lemur` use the following call.
+To create the LEMUR object that provides functionality to fit, align, predict, and transform input data:
 
 ```{eval-rst}
 .. module:: pylemur.tl
@@ -10,11 +10,7 @@ To run `lemur` use the following call.
 
 .. autosummary::
     :toctree: generated
-
-    pylemur.tl.lemur
-    pylemur.tl.align_with_harmony
-    pylemur.tl.align_with_grouping
-    pylemur.tl.predict
-    pylemur.tl.cond
+    
+    pylemur.tl.LEMUR
 ```
 

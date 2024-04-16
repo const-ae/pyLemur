@@ -44,10 +44,42 @@ class LEMUR:
         the linear coefficients are estimated using ridge regression. If `"zero"`,
         the linear coefficients are set to zero.
     layer
-        The name of the layer to use in `data`. If None, the X slot is used.
+        The name of the layer to use in `data`. If `None`, the `X` slot is used.
     copy
         Whether to make a copy of `data`.
 
+    Attributes
+    ----------    
+    embedding : :class:`~numpy.ndarray` (:math:`C \\times P`)
+        Low-dimensional representation of each cell 
+    adata : :class:`~anndata.AnnData`
+        A reference to (potentially a copy of) the input data.
+    data_matrix : :class:`~numpy.ndarray` (:math:`C \\times G`)
+        A reference to the data matrix from the `adata` object.
+    n_embedding : int
+        The number of latent dimensions
+    design_matrix : :class:`~formulaic.model_matrix.ModelMatrix` (:math:`C \\times K`)
+        The design matrix that is used for the fit.
+    formula : str
+        The design formula specification.
+    coefficients : :class:`~numpy.ndarray` (:math:`P \\times G \\times K`)
+        The 3D array of coefficients for the Grassmann regression.
+    alignment_coefficients : :class:`~numpy.ndarray` (:math:`P \\times (P+1) \\times K`)
+        The 3D array of coefficients for the affine alignment.
+    linear_coefficients : :class:`~numpy.ndarray` (:math:`K\\times G`)
+        The 2D array of coefficients for the linear offset per condition.
+    linear_coefficient_estimator : str
+        The linear coefficient estimation specification.
+    base_point :  :class:`~numpy.ndarray` (:math:`(P \\times G`))
+        The 2D array representing the reference subspace.
+    
+    Examples
+    --------
+    >>> model = pylemur.tl.LEMUR(adata, design = "~ label + batch_cov", n_embedding=15)
+    >>> model.fit()
+    >>> model.align_with_harmony()
+    >>> pred_expr = model.predict(new_condition = model.cond(label="treated"))
+    >>> emb_proj = model_small.transform(adata)
     """
 
     def __init__(self,
@@ -87,7 +119,7 @@ class LEMUR:
         
         Returns
         -------
-        self
+        `self`
             The fitted LEMUR model.
         """
         
@@ -130,10 +162,9 @@ class LEMUR:
 
         Parameters
         ----------
-        fit
-            The AnnData object produced by `lemur`.
         ridge_penalty
-            The penalty controlling the flexibility of the alignment.
+            The penalty controlling the flexibility of the alignment. Smaller
+            values mean more flexible alignments.
         max_iter
             The maximum number of iterations to perform.
         verbose
@@ -142,10 +173,10 @@ class LEMUR:
 
         Returns
         -------
-        :class:`~anndata.AnnData`
-            The input AnnData object with the updated embedding space stored in
-            `data.obsm["embedding"]` and an the updated alignment coefficients
-            stored in `data.uns["lemur"]["alignment_coefficients"]`.
+        `self`
+            The fitted LEMUR model with the updated embedding space stored in
+            `model.embedding` attribute and an the updated alignment coefficients
+            stored in `model.alignment_coefficients`.
         """
         embedding = self.embedding.copy()
         design_matrix = self.design_matrix
@@ -190,10 +221,8 @@ class LEMUR:
 
         Parameters
         ----------
-        fit
-            The AnnData object produced by `lemur`.
         grouping
-            A list, numpy array, or pandas Series specifying the group of cells.
+            A list, :class:`~numpy.ndarray`, or pandas :class:`pandas.Series` specifying the group of cells.
             The groups span different conditions and can for example be cell types.
         ridge_penalty
             The penalty controlling the flexibility of the alignment.
@@ -205,10 +234,10 @@ class LEMUR:
 
         Returns
         -------
-        :class:`~anndata.AnnData`
-            The input AnnData object with the updated embedding space stored in
-            `data.obsm["embedding"]` and an the updated alignment coefficients
-            stored in `data.uns["lemur"]["alignment_coefficients"]`.
+        `self`
+            The fitted LEMUR model with the updated embedding space stored in
+            `model.embedding` attribute and an the updated alignment coefficients
+            stored in `model.alignment_coefficients`.
         """
         embedding = self.embedding.copy()
         design_matrix = self.design_matrix
@@ -233,17 +262,25 @@ class LEMUR:
 
         Parameters
         ----------
-        data
+        adata
             The AnnData object to transform.
-        layer
-            The name of the layer to use in `data`. If None, the X slot is used.
+        obs_data
+            Optional set of annotations for each cell (same as `obs_data` in the 
+            constructor).
+        return_type
+            Flag that decides if the function returns a full `LEMUR` object or
+            only the embedding.
 
         Returns
         -------
-        :class:`~anndata.AnnData`
-            The input AnnData object with the updated embedding space stored in
-            `data.obsm["embedding"] and an the updated alignment coefficients
-            stored in `data.uns["lemur"]["alignment_coefficients"]`.
+        :class:`~pylemur.tl.LEMUR`
+            (if `return_type = "LEMUR"`) A new `LEMUR` object object with the embedding 
+            calculated for the input `adata`.
+        
+        :class:`~numpy.ndarray`
+            (if `return_type = "embedding"`) A 2D numpy array of the embedding matrix
+            calculated for the input `adata` (with cells in the rows and latent dimensions
+            in the columns).
         """
         Y = handle_data(adata, layer)
         adata.obs = handle_obs_data(adata, obs_data)
@@ -268,7 +305,7 @@ class LEMUR:
         new_design: Union[str, list[str], np.ndarray, None] = None,
         new_condition: Union[np.ndarray, pd.DataFrame, None] = None,
         obs_data: Union[pd.DataFrame, Mapping[str, Iterable[Any]], None] = None,
-        new_adata_layer = None
+        new_adata_layer: Union[None, str] = None
     ):
         """Predict the expression of cells in a specific condition
 
@@ -276,18 +313,21 @@ class LEMUR:
         ----------
         embedding
             The coordinates of the cells in the shared embedding space. If None,
-            the coordinates stored in `fit.obsm["embedding"]` are used.
+            the coordinates stored in `model.embedding` are used.
         new_design
-            Either a design formula parsed using `fit.obs` and `obs_data` or
+            Either a design formula parsed using `model.adata.obs` and `obs_data` or
             a design matrix defining the condition for each cell. If both `new_design`
             and `new_condition` are None, the original design matrix
-            (`fit.uns["lemur"]["design_matrix"]`) is used.
+            (`model.design_matrix`) is used.
         new_condition
             A specification of the new condition that is applied to all cells. Typically,
             this is generated by `cond(...)`.
         obs_data
-            A DataFrame containing cell-wise annotations. It is only used if `new_design`
+            A DataFrame-like object containing cell-wise annotations. It is only used if `new_design`
             contains a formulaic formula string.
+        new_adata_layer
+            If not `None`, the function returns `self` and stores the prediction in
+            `model.adata["new_adata_layer"]`.
 
         Returns
         -------
@@ -354,9 +394,15 @@ class LEMUR:
 
         Returns
         -------
-        :class:`~pandas.DataFrame`
-            A DataFrame with one row with the same columns as the design matrix.
+        :class:`~formulaic.model_matrix.ModelMatrix`
+            A ModelMatrix instance with one row with the same columns as the design matrix. 
+            
 
+        Notes
+        -----
+        Subtracting two `cond(...)` calls, produces a contrast vector; these are 
+        commonly used in `R` to test for differences in a regression model.
+        This pattern is inspired by the `R` package `glmGamPoi <https://bioconductor.org/packages/glmGamPoi/>`__.
         """
 
         # This is copied from https://github.com/scverse/multi-condition-comparisions/blob/main/src/multi_condition_comparisions/tl/de.py#L164

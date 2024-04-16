@@ -85,6 +85,7 @@ import pylemur
 model = pylemur.tl.LEMUR(adata, design = "~ label", n_embedding=15)
 model.fit()
 model.align_with_harmony()
+print(model)
 ```
 
 To assess the success of the LEMUR model fit, we plot a UMAP representation of the embedding calculated by LEMUR. Here, the two conditions are mixed and the different cell types and cell states drive the visible variation.
