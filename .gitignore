@@ -41,6 +41,7 @@ buck-out/
 
 # Compiled files
 .venv/
+.venv_pre_release/
 __pycache__/
 .mypy_cache/
 .ruff_cache/
