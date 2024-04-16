@@ -1,36 +1,31 @@
 ---
-title: pyLemur Walkthrough
-date: today
-authors: Constantin Ahlmann-Eltze
-bibliography: ../references.bib
-format: 
-    ipynb:
-        toc: true
-        fig-format: retina
-        df-print: default
-        standalone: false
-execute: 
-  enabled: true
-jupyter: python3
+file_format: mystnb
+mystnb:
+    execution_timeout: 600
+kernelspec:
+  name: python3
 ---
+
+# pyLemur Walkthrough
 
 
 The goal of `pyLemur` is to simplify analysis of multi-condition single-cell data. If you have collected a single-cell RNA-seq dataset with more than one condition, lemur predicts for each cell and gene how much the expression would change if the cell had been in the other condition.
 
 `pyLemur` is a Python implementation of the LEMUR model; there is also an `R` package called [lemur](https://bioconductor.org/packages/lemur/) which provides additional functionality: identifying neighborhoods of cells that show consistent differential expression values and a pseudo-bulk test to validate the findings.
 
-`pyLemur` implements a novel framework to disentangle the effects of known covariates, latent cell states, and their interactions. At the core, is a combination of matrix factorization and regression analysis implemented as geodesic regression on Grassmann manifolds. We call this latent embedding multivariate regression. For more details see our [preprint](https://www.biorxiv.org/content/10.1101/2023.03.06.531268) [@Ahlmann-Eltze2024].
+`pyLemur` implements a novel framework to disentangle the effects of known covariates, latent cell states, and their interactions. At the core, is a combination of matrix factorization and regression analysis implemented as geodesic regression on Grassmann manifolds. We call this latent embedding multivariate regression. For more details see our [preprint](https://www.biorxiv.org/content/10.1101/2023.03.06.531268) {cite:p}`Ahlmann-Eltze2024`.
 
 <img src="../_static/images/equation_schematic.png" alt="Schematic of the matrix decomposition atthe core of LEMUR" />
 
 
 ## Data
 
-For demonstration, I will use the a dataset of interferon-$\beta$ stimuted blood cells from @kang2018.
+For demonstration, I will use the a dataset of interferon-$\beta$ stimuted blood cells from {cite:t}`kang2018`.
 
-```{python}
-#| label: import-data
-#| warning: false
+```{code-cell} ipython3
+---
+output_stderr: remove
+---
 # Standard imports
 import numpy as np
 import scanpy as sc
@@ -45,16 +40,14 @@ adata.layers["counts"] = adata.X.copy()
 
 The data consist of $24\,673$ cells and $15\,706$ genes. The cells were measured in two conditions (`label="ctrl"` and `label="stim"`). The authors have annotated the cell type for each cell. This will be useful to analyze LEMUR's results, but the cell type labels are not actually used to the LEMUR model.
 
-```{python}
-#| label: pandas-print-settings
-#| echo: false
+```{code-cell} ipython3
+:tags: ["remove-cell"]
 import pandas as pd
 pd.options.display.width = 200
 pd.options.display.max_colwidth = 20
 ```
 
-```{python}
-#| label: data-overview
+```{code-cell} ipython3
 print(adata)
 print(adata.obs)
 ```
@@ -63,8 +56,7 @@ print(adata.obs)
 
 LEMUR expects that the input has been variance-stabilized. Here, I will use the log-transformation as a simple, yet effective approach.
 In addition, I will select the $1\,000$ most variable genes, to make the results easier to manage.
-```{python}
-#| label: standard-preprocessing
+```{code-cell} ipython3
 # This follows the standard recommendation from scanpy 
 sc.pp.normalize_total(adata, target_sum = 1e4, inplace=True)
 sc.pp.log1p(adata)
@@ -75,7 +67,7 @@ adata
 ```
 
 If we make a dimensional-embedding of the data using UMAP, we see that the cell types split-up by treatment status.
-```{python}
+```{code-cell} ipython3
 #| label: fig-raw-umap
 sc.tl.pca(adata)
 sc.pp.neighbors(adata)
@@ -88,8 +80,7 @@ sc.pl.umap(adata, color=["label", "cell_type"])
 
 First, we import `pyLemur`; then, we fit the LEMUR model by providing the `AnnData` object, a specification of the experimental design, and the number of latent dimensions.
 
-```{python}
-#| label: fit-lemur
+```{code-cell} ipython3
 import pylemur
 model = pylemur.tl.LEMUR(adata, design = "~ label", n_embedding=15)
 model.fit()
@@ -97,8 +88,7 @@ model.align_with_harmony()
 ```
 
 To assess the success of the LEMUR model fit, we plot a UMAP representation of the embedding calculated by LEMUR. Here, the two conditions are mixed and the different cell types and cell states drive the visible variation.
-```{python}
-#| label: fig-plot-lemur
+```{code-cell} ipython3
 # Recalculate the UMAP embedding on calculated by LEMUR
 adata.obsm["embedding"] = model.embedding
 sc.pp.neighbors(adata, use_rep="embedding")
@@ -108,15 +98,13 @@ sc.pl.umap(adata, color=["label", "cell_type"])
 
 The LEMUR model is fully parametric, which means that we can predict for each cell what it's expression would have been in any condition (i.e., for a cell observed in the control condition, we can predict its expression under treatment), as a function of its low-dimensional embedding.
 
-```{python}
-#| label: predict-expression
+```{code-cell} ipython3
 ctrl_pred = model.predict(new_condition=model.cond(label="ctrl"))
 stim_pred = model.predict(new_condition=model.cond(label="stim"))
 ```
 
 We can now check the predicted differential expression against the underlying observed expression patterns for individual genes.
-```{python}
-#| label: fig-example-gene-expr
+```{code-cell} ipython3
 import matplotlib.pyplot as plt
 adata.layers["diff"] = stim_pred - ctrl_pred
 sel_gene = "TNFRSF18"
@@ -131,8 +119,7 @@ sc.pl.umap(adata[adata.obs["label"]=="stim"], layer="logcounts", color=[sel_gene
 ```
 
 To assess the overall accuracy of LEMUR's predictions, I compare the average prediction per cell type across conditions. Genes on the diagonal don't change expression much between conditions, whereas all genes off-diagonal show differential expression within a cell type:
-```{python}
-#| label: fig-pred-raw
+```{code-cell} ipython3
 def rowMeans_per_group(X, group):
     uniq = np.unique(group)
     res = np.zeros((len(uniq), X.shape[1]))
@@ -153,8 +140,7 @@ plt.axline((0, 0), (1, 1), linewidth=1, color='black')
 ```
 
 Too check how well LEMUR learned the underlying expression relations, I predict the expression of cells from the control condition under stimulation, against the observed expression in the stimulated condition.
-```{python}
-#| label: fig-pred-accuracy
+```{code-cell} ipython3
 stim_pred_per_cell_type = rowMeans_per_group(stim_pred[adata.obs["label"]=="ctrl"], adata_ctrl.obs["cell_type"])
 
 plt.scatter(stim_expr_per_cell_type, stim_pred_per_cell_type, c = obs_diff,
@@ -166,8 +152,7 @@ plt.axline((0, 0), (1, 1), linewidth=1, color='black')
 
 Lastly, I diretly, compare the predicted differential expression against the observed differential expression per cell type.
 
-```{python}
-#| label: fig-de-accuracy
+```{code-cell} ipython3
 pred_diff = rowMeans_per_group(adata.layers["diff"], adata.obs["cell_type"])
 
 plt.scatter(obs_diff, pred_diff, c = obs_diff,
@@ -178,7 +163,7 @@ plt.axline((0, 0), (1, 1), linewidth=1, color='black')
 ```
 
 Another advantage of LEMUR's parametricity is that you could also train the model on a subset of the data and then apply it to the full data. I train the same LEMUR model on 5% of the original data, `transform` the full data, and compare the first three dimensions of the embedding against the embedding from the model trained on the full model.
-```{python}
+```{code-cell} ipython3
 adata_subset = adata[np.random.choice(np.arange(adata.shape[0]), size = round(adata.shape[0] * 0.05)),]
 model_small = pylemur.tl.LEMUR(adata_subset, design = "~ label", n_embedding=15)
 model_small.fit().align_with_harmony()
@@ -190,16 +175,15 @@ plt.axline((0, 0), (-1, 1), linewidth=1, color='black')
 
 ### Session Info
 
-```{python}
-#| label: session-info
-#| code-fold: true
+```{code-cell} ipython3
 import session_info
 session_info.show()
 ```
 
 
-### References
+### Referenes
 
-::: {#refs}
-:::
-
+```{bibliography}
+:style: plain
+:filter: docname in docnames
+```
