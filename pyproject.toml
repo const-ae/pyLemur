@@ -48,6 +48,10 @@ doc = [
     "ipython",
     "sphinx-copybutton",
     "pandas",
+    "scanpy",
+    "pertpy",
+    "matplotlib",
+    "session-info",
 ]
 test = [
     "pytest",
