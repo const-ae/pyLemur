@@ -188,7 +188,7 @@ class LEMUR:
         harm_obj = _init_harmony(embedding, design_matrix, verbose=verbose)
         for idx in range(max_iter):
             if verbose:
-                print(f"Iteration {idx}")
+                print(f"Alignment iteration {idx}")
             # Update harmony
             harm_obj.cluster()
             # alignment <- align_impl(training_fit$embedding, harm_obj$R, act_design_matrix, ridge_penalty = ridge_penalty)

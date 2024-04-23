@@ -70,8 +70,9 @@ def _align_impl(
     intercept_emb = np.hstack([np.ones((embedding.shape[0], 1)), embedding])
     interact_design_matrix = np.repeat(design_matrix, n_emb + 1, axis=1) * np.hstack([intercept_emb] * K)
     alignment_coefs = ridge_regression(new_pos - embedding, interact_design_matrix, ridge_penalty)
-    if verbose:
-        print(f"Alignment error: {np.linalg.norm((new_pos - embedding) - interact_design_matrix @ alignment_coefs)}")
+    ## The alignment error is weird, as it doesn't necessarily go down. Better not to show it
+    # if verbose:
+    #     print(f"Alignment error: {np.linalg.norm((new_pos - embedding) - interact_design_matrix @ alignment_coefs)}")
     alignment_coefs = alignment_coefs.reshape((K, n_emb + 1, n_emb)).transpose((2, 1, 0))
     if calculate_new_embedding:
         new_embedding = _apply_linear_transformation(embedding, alignment_coefs, design_matrix)
