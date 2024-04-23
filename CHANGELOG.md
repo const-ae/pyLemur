@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning][].
 
 ## [Unreleased]
 
+## [0.2.1]
+
+- Change example gene to one with clearer differential expression pattern
+- Remove error output in `align_harmony
+
 ## [0.2.0]
 
 Major rewrite of the API. Instead of adding coefficients as custom fields
