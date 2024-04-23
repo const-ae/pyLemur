@@ -104,15 +104,20 @@ ctrl_pred = model.predict(new_condition=model.cond(label="ctrl"))
 stim_pred = model.predict(new_condition=model.cond(label="stim"))
 ```
 
-We can now check the predicted differential expression against the underlying observed expression patterns for individual genes. Here, I chose _TNFRSF18_ as an example. The blue cells in the first plot are in neighborhoods with higher expression in the stimulated condition than in the control condition. The two other plots show the underlying gene expression for the control and stimulated cells and confirm LEMUR's inference.
+We can now check the predicted differential expression against the underlying observed expression patterns for individual genes. Here, I chose _TSC22D3_ as an example. The blue cells in the first plot are in neighborhoods with higher expression in the control condition than in the stimulated condition. The two other plots show the underlying gene expression for the control and stimulated cells and confirm LEMUR's inference.
 ```{code-cell} ipython3
 import matplotlib.pyplot as plt
 adata.layers["diff"] = stim_pred - ctrl_pred
-sel_gene = "TNFRSF18"
+# Also try CXCL10, IL8, and FBXO40
+sel_gene = "TSC22D3"
 
-_,axs = plt.subplots(nrows = 1, ncols = 3)
+fsize = plt.rcParams['figure.figsize']
+fig = plt.figure(figsize=(fsize[0] * 3, fsize[1])) 
+axs = [fig.add_subplot(1, 3, i+1) for i in range(3)]
+for ax in axs:
+    ax.set_aspect('equal')
 sc.pl.umap(adata, layer="diff", color=[sel_gene], cmap = plt.get_cmap("seismic"), vcenter=0,
-    vmin = -0.5, vmax =0.5, title="Pred diff (stim - ctrl)", ax=axs[0], show=False)
+    vmin=-4, vmax=4, title="Pred diff (stim - ctrl)", ax=axs[0], show=False)
 sc.pl.umap(adata[adata.obs["label"]=="ctrl"], layer="logcounts", color=[sel_gene], vmin = 0, vmax =4,
     title="Ctrl expr", ax=axs[1], show=False)
 sc.pl.umap(adata[adata.obs["label"]=="stim"], layer="logcounts", color=[sel_gene], vmin = 0, vmax =4,
