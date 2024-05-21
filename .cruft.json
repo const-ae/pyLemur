@@ -1,7 +1,7 @@
 {
   "template": "https://github.com/scverse/cookiecutter-scverse",
-  "commit": "c6e5e5008a7b2915709b7def3cdcddcf6159c301",
-  "checkout": null,
+  "commit": "87a407a65408d75a949c0b54b19fd287475a56f8",
+  "checkout": "v0.4.0",
   "context": {
     "cookiecutter": {
       "project_name": "pyLemur",
