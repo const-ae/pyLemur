@@ -22,7 +22,7 @@ The Python implementation of the LEMUR method to analyze multi-condition single-
 
 ## Installation
 
-You need to have Python 3.9 or newer installed on your system. 
+You need to have Python 3.10 or newer installed on your system. 
 There are several alternative options to install pyLemur:
 
 

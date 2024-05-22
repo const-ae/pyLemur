@@ -7,7 +7,7 @@ name = "pyLemur"
 version = "0.2.1"
 description = "A Python implementation of the LEMUR algorithm for analyzing multi-condition single-cell RNA-seq data."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = {file = "LICENSE"}
 authors = [
     {name = "Constantin Ahlmann-Eltze"},
