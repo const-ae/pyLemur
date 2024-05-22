@@ -4,7 +4,7 @@ requires = ["hatchling"]
 
 [project]
 name = "pyLemur"
-version = "0.2.1-devel"
+version = "0.2.1.devel"
 description = "A Python implementation of the LEMUR algorithm for analyzing multi-condition single-cell RNA-seq data."
 readme = "README.md"
 requires-python = ">=3.10"
