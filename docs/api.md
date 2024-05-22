@@ -10,7 +10,6 @@ To create the LEMUR object that provides functionality to fit, align, predict, a
 
 .. autosummary::
     :toctree: generated
-    
+
     pylemur.tl.LEMUR
 ```
-

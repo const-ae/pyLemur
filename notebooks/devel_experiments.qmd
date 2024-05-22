@@ -6,8 +6,8 @@ format:
         code-fold: false
         embed-resources: true
         highlight-style: github
-        toc: true 
-        code-line-numbers: true 
+        toc: true
+        code-line-numbers: true
 execute:
   keep-ipynb: true
 jupyter: python3
@@ -61,7 +61,7 @@ row_groups(des)
 
 
 ```{python}
-# 400 cells, 30 features 
+# 400 cells, 30 features
 Y = np.random.rand(400, 30)
 ```
 

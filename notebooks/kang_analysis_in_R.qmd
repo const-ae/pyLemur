@@ -50,14 +50,14 @@ pred_ctrl[1:3, 1:3]
 
 
 ```{r}
-py_pred <- t(as.matrix(readr::read_tsv("/var/folders/dc/tppjxs9x6ll378lq88lz1fm40000gq/T//Rtmpm5PTRh/pred_ctrl.tsv", col_names = FALSE)))    
+py_pred <- t(as.matrix(readr::read_tsv("/var/folders/dc/tppjxs9x6ll378lq88lz1fm40000gq/T//Rtmpm5PTRh/pred_ctrl.tsv", col_names = FALSE)))
 dimnames(py_pred) <- dimnames(fit)
 plot(py_pred[1,], pred_ctrl[1,])
 ```
 
 
 ```{r}
-py_emb <- t(as.matrix(readr::read_tsv("/var/folders/dc/tppjxs9x6ll378lq88lz1fm40000gq/T//Rtmpm5PTRh/embedding.tsv", col_names = FALSE)))    
+py_emb <- t(as.matrix(readr::read_tsv("/var/folders/dc/tppjxs9x6ll378lq88lz1fm40000gq/T//Rtmpm5PTRh/embedding.tsv", col_names = FALSE)))
 dimnames(py_emb) <- dimnames(fit$embedding)
 plot(py_emb[1,], fit$embedding[1,])
 ```

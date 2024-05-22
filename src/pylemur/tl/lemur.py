@@ -1,7 +1,7 @@
 import re
 import warnings
 from collections.abc import Iterable, Mapping
-from typing import Any, Literal, Union
+from typing import Any, Literal
 
 import anndata as ad
 import formulaic
@@ -54,9 +54,9 @@ class LEMUR:
         Whether to make a copy of `data`.
 
     Attributes
-    ----------    
+    ----------
     embedding : :class:`~numpy.ndarray` (:math:`C \\times P`)
-        Low-dimensional representation of each cell 
+        Low-dimensional representation of each cell
     adata : :class:`~anndata.AnnData`
         A reference to (potentially a copy of) the input data.
     data_matrix : :class:`~numpy.ndarray` (:math:`C \\times G`)
@@ -77,13 +77,13 @@ class LEMUR:
         The linear coefficient estimation specification.
     base_point :  :class:`~numpy.ndarray` (:math:`(P \\times G`))
         The 2D array representing the reference subspace.
-    
+
     Examples
     --------
-    >>> model = pylemur.tl.LEMUR(adata, design = "~ label + batch_cov", n_embedding=15)
+    >>> model = pylemur.tl.LEMUR(adata, design="~ label + batch_cov", n_embedding=15)
     >>> model.fit()
     >>> model.align_with_harmony()
-    >>> pred_expr = model.predict(new_condition = model.cond(label="treated"))
+    >>> pred_expr = model.predict(new_condition=model.cond(label="treated"))
     >>> emb_proj = model_small.transform(adata)
     """
 
@@ -121,7 +121,7 @@ class LEMUR:
         ----------
         verbose
             Whether to print progress to the console.
-        
+
         Returns
         -------
         `self`
@@ -213,7 +213,6 @@ class LEMUR:
         self.embedding = _apply_linear_transformation(embedding, al_coef, design_matrix)
         return self
 
-
     def align_with_grouping(
         self,
         grouping: Union[list, np.ndarray, pd.Series],
@@ -253,10 +252,15 @@ class LEMUR:
             grouping[grouping == -1] = np.nan
 
         al_coef = _align_impl(
-            embedding, grouping, design_matrix, ridge_penalty=ridge_penalty, calculate_new_embedding=False, verbose=verbose
+            embedding,
+            grouping,
+            design_matrix,
+            ridge_penalty=ridge_penalty,
+            calculate_new_embedding=False,
+            verbose=verbose,
         )
         self.alignment_coefficients = al_coef
-        self.embedding =  _apply_linear_transformation(embedding, al_coef, design_matrix)
+        self.embedding = _apply_linear_transformation(embedding, al_coef, design_matrix)
         return self
 
     def transform(self, adata: ad.AnnData, layer: Union[str, None] = None,
@@ -269,7 +273,7 @@ class LEMUR:
         adata
             The AnnData object to transform.
         obs_data
-            Optional set of annotations for each cell (same as `obs_data` in the 
+            Optional set of annotations for each cell (same as `obs_data` in the
             constructor).
         return_type
             Flag that decides if the function returns a full `LEMUR` object or
@@ -278,9 +282,9 @@ class LEMUR:
         Returns
         -------
         :class:`~pylemur.tl.LEMUR`
-            (if `return_type = "LEMUR"`) A new `LEMUR` object object with the embedding 
+            (if `return_type = "LEMUR"`) A new `LEMUR` object object with the embedding
             calculated for the input `adata`.
-        
+
         :class:`~numpy.ndarray`
             (if `return_type = "embedding"`) A 2D numpy array of the embedding matrix
             calculated for the input `adata` (with cells in the rows and latent dimensions
@@ -291,8 +295,9 @@ class LEMUR:
         design_matrix, _ = handle_design_parameter(self.formula, adata.obs)
         dm = design_matrix.to_numpy()
         Y_clean = Y - dm @ self.linear_coefficients
-        embedding = project_data_on_diffemb(Y_clean, design_matrix = dm, coefficients = self.coefficients,
-                                            base_point = self.base_point)
+        embedding = project_data_on_diffemb(
+            Y_clean, design_matrix=dm, coefficients=self.coefficients, base_point=self.base_point
+        )
         embedding = _apply_linear_transformation(embedding, self.alignment_coefficients, dm)
         if return_type == "embedding":
             return embedding
@@ -375,13 +380,14 @@ class LEMUR:
             subspace = grassmann_map(np.dot(coef, covars).T, self.base_point.T)
             alignment = _reverse_linear_transformation(al_coefs, covars)
             offset = np.dot(al_coefs[:, 0, :], covars)
-            approx[des_row_groups == id, :] += ((embedding[des_row_groups == id, :] - offset) @ alignment.T) @ subspace.T
+            approx[des_row_groups == id, :] += (
+                (embedding[des_row_groups == id, :] - offset) @ alignment.T
+            ) @ subspace.T
         if new_adata_layer is not None:
             self.adata.layers[new_adata_layer] = approx
             return self
         else:
             return approx
-
 
     def cond(self, **kwargs):
         """Define a condition for the `predict` function.
@@ -398,12 +404,12 @@ class LEMUR:
         Returns
         -------
         :class:`~formulaic.model_matrix.ModelMatrix`
-            A ModelMatrix instance with one row with the same columns as the design matrix. 
-            
+            A ModelMatrix instance with one row with the same columns as the design matrix.
+
 
         Notes
         -----
-        Subtracting two `cond(...)` calls, produces a contrast vector; these are 
+        Subtracting two `cond(...)` calls, produces a contrast vector; these are
         commonly used in `R` to test for differences in a regression model.
         This pattern is inspired by the `R` package `glmGamPoi <https://bioconductor.org/packages/glmGamPoi/>`__.
         """
@@ -452,7 +458,6 @@ class LEMUR:
             return f"LEMUR model (not fitted yet) with {self.n_embedding} dimensions"
         else:
             return f"LEMUR model with {self.n_embedding} dimensions"
-
 
 
 def order_axis_by_variance(embedding, coefficients, base_point):

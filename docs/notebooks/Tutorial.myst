@@ -30,7 +30,7 @@ output_stderr: remove
 import numpy as np
 import scanpy as sc
 # pertpy is needed to download the Kang data
-import pertpy 
+import pertpy
 
 # This will download the data to ./data/kang_2018.h5ad
 adata = pertpy.data.kang_2018()
@@ -57,7 +57,7 @@ print(adata.obs)
 LEMUR expects that the input has been variance-stabilized. Here, I will use the log-transformation as a simple, yet effective approach.
 In addition, I will only work on the $1\,000$ most variable genes to make the results easier to manage.
 ```{code-cell} ipython3
-# This follows the standard recommendation from scanpy 
+# This follows the standard recommendation from scanpy
 sc.pp.normalize_total(adata, target_sum = 1e4, inplace=True)
 sc.pp.log1p(adata)
 adata.layers["logcounts"] = adata.X.copy()
@@ -112,7 +112,7 @@ adata.layers["diff"] = stim_pred - ctrl_pred
 sel_gene = "TSC22D3"
 
 fsize = plt.rcParams['figure.figsize']
-fig = plt.figure(figsize=(fsize[0] * 3, fsize[1])) 
+fig = plt.figure(figsize=(fsize[0] * 3, fsize[1]))
 axs = [fig.add_subplot(1, 3, i+1) for i in range(3)]
 for ax in axs:
     ax.set_aspect('equal')
@@ -168,7 +168,7 @@ plt.title( "LEMUR's DE predictions are accurate")
 plt.axline((0, 0), (1, 1), linewidth=1, color='black')
 ```
 
-Another advantage of LEMUR's parametricity is that you could train the model on a subset of the data and then apply it to the full data. 
+Another advantage of LEMUR's parametricity is that you could train the model on a subset of the data and then apply it to the full data.
 
 I will demonstrate this by training the same LEMUR model on 5% of the original data, then `transform` the full data, and finally compare the first three dimensions of the embedding against the embedding from the model trained on the full model.
 

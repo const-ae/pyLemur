@@ -6,8 +6,8 @@ format:
         code-fold: false
         embed-resources: true
         highlight-style: github
-        toc: true 
-        code-line-numbers: true 
+        toc: true
+        code-line-numbers: true
 execute:
   keep-ipynb: true
 jupyter: python3
@@ -30,7 +30,7 @@ debugpy.wait_for_client()
 ```{python}
 import numpy as np
 import scanpy as sc
-import pertpy 
+import pertpy
 
 adata = pertpy.data.kang_2018()
 adata

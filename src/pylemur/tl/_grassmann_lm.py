@@ -33,9 +33,7 @@ def grassmann_geodesic_regression(coord_systems, design, base_point, weights=Non
     if weights is None:
         weights = np.ones(n_obs)
 
-    tangent_vecs = [
-        grassmann_log(base_point.T, coord_systems[i].T).T.reshape(n_emb * n_features) for i in range(n_obs)
-    ]
+    tangent_vecs = [grassmann_log(base_point.T, coord_systems[i].T).T.reshape(n_emb * n_features) for i in range(n_obs)]
     tangent_vecs = np.vstack(tangent_vecs)
     if tangent_vecs.shape[0] == 0:
         tangent_fit = np.zeros((0, n_coef))
