@@ -87,14 +87,16 @@ class LEMUR:
     >>> emb_proj = model_small.transform(adata)
     """
 
-    def __init__(self,
-                 adata: ad.AnnData,
-                 design: Union[str, list[str], np.ndarray] = "~ 1",
-                 obs_data: Union[pd.DataFrame, Mapping[str, Iterable[Any]], None] = None,
-                 n_embedding: int = 15,
-                 linear_coefficient_estimator: Literal["linear", "zero"] = "linear",
-                 layer: Union[str, None] = None,
-                 copy: bool = True):
+    def __init__(
+        self,
+        adata: ad.AnnData,
+        design: str | list[str] | np.ndarray = "~ 1",
+        obs_data: pd.DataFrame | Mapping[str, Iterable[Any]] | None = None,
+        n_embedding: int = 15,
+        linear_coefficient_estimator: Literal["linear", "zero"] = "linear",
+        layer: str | None = None,
+        copy: bool = True,
+    ):
         if copy:
             adata = adata.copy()
         self.adata = adata
@@ -160,7 +162,7 @@ class LEMUR:
         return self
 
     def align_with_harmony(
-        self, ridge_penalty: Union[float, list[float], np.ndarray] = 0.01, max_iter: int = 10, verbose: bool = True
+        self, ridge_penalty: float | list[float] | np.ndarray = 0.01, max_iter: int = 10, verbose: bool = True
     ):
         """Fine-tune the embedding with a parametric version of Harmony.
 
@@ -215,8 +217,8 @@ class LEMUR:
 
     def align_with_grouping(
         self,
-        grouping: Union[list, np.ndarray, pd.Series],
-        ridge_penalty: Union[float, list[float], np.ndarray] = 0.01,
+        grouping: list | np.ndarray | pd.Series,
+        ridge_penalty: float | list[float] | np.ndarray = 0.01,
         preserve_position_of_NAs: bool = False,
         verbose: bool = True,
     ):
@@ -263,9 +265,13 @@ class LEMUR:
         self.embedding = _apply_linear_transformation(embedding, al_coef, design_matrix)
         return self
 
-    def transform(self, adata: ad.AnnData, layer: Union[str, None] = None,
-                  obs_data: Union[pd.DataFrame, Mapping[str, Iterable[Any]], None] = None,
-                  return_type: Literal["embedding", "LEMUR"] = "embedding"):
+    def transform(
+        self,
+        adata: ad.AnnData,
+        layer: str | None = None,
+        obs_data: pd.DataFrame | Mapping[str, Iterable[Any]] | None = None,
+        return_type: Literal["embedding", "LEMUR"] = "embedding",
+    ):
         """Transform data using the fitted LEMUR model
 
         Parameters
@@ -308,13 +314,13 @@ class LEMUR:
             fit.embedding = embedding
             return fit
 
-
-    def predict(self,
-        embedding: Union[np.ndarray, None] = None,
-        new_design: Union[str, list[str], np.ndarray, None] = None,
-        new_condition: Union[np.ndarray, pd.DataFrame, None] = None,
-        obs_data: Union[pd.DataFrame, Mapping[str, Iterable[Any]], None] = None,
-        new_adata_layer: Union[None, str] = None
+    def predict(
+        self,
+        embedding: np.ndarray | None = None,
+        new_design: str | list[str] | np.ndarray | None = None,
+        new_condition: np.ndarray | pd.DataFrame | None = None,
+        obs_data: pd.DataFrame | Mapping[str, Iterable[Any]] | None = None,
+        new_adata_layer: None | str = None,
     ):
         """Predict the expression of cells in a specific condition
 
