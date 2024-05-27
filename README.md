@@ -66,7 +66,7 @@ pytest
 Run pre-commit hooks manually
 
 ```
-bash .git/hooks/pre-commit
+pre-commit run --all-files
 ```
 
 or individually
