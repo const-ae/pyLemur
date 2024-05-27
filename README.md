@@ -46,3 +46,31 @@ If you found a bug, please use the [issue tracker][issue-tracker].
 
 [scverse-discourse]: https://discourse.scverse.org/
 [issue-tracker]: https://github.com/const-ae/pyLemur/issues
+
+## Building
+
+Build the documentation locally
+
+```
+cd docs
+make html
+open _build/html/index.html
+```
+
+Run the unit tests
+
+```
+pytest
+```
+
+Run pre-commit hooks manually
+
+```
+bash .git/hooks/pre-commit
+```
+
+or individually
+
+```
+ruff check
+```
