@@ -72,7 +72,7 @@ def test_project_data_on_diffemb():
     assert np.allclose(proj @ rot, pca.embedding)
 
 
-def test_project_data_on_diffemb():
+def test_project_data_on_diffemb2():
     n_obs = 100
     base_point = grassmann_project(np.random.randn(5, 2)).T
     data = np.random.randn(n_obs, 5)

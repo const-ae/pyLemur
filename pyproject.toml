@@ -126,7 +126,12 @@ convention = "numpy"
 
 [tool.ruff.lint.per-file-ignores]
 "docs/*" = ["I"]
-"tests/*" = ["D"]
+"tests/*" = [
+    # Pydoc doesn't mattter in tests
+    "D",
+    # Ignore star imports in tests
+    "F403", "F405"
+]
 "*/__init__.py" = ["F401"]
 
 [tool.cruft]

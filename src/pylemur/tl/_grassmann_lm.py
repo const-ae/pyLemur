@@ -7,6 +7,8 @@ from pylemur.tl._lin_alg_wrappers import fit_pca, ridge_regression
 
 def grassmann_geodesic_regression(coord_systems, design, base_point, weights=None):
     """
+    Fit geodesic regression on Grassmann manifolds
+
     Solve Sum_j d(U_j, Exp_p(Sum_k V_k:: * X_jk)) for V, where
     d(U, V) = ||Log(U, V)|| is the inverse of the exponential map on the Grassmann manifold.
 

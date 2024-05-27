@@ -132,7 +132,7 @@ def _init_harmony(
         nclust = np.min([np.round(n_obs / 30.0), 100]).astype(int)
 
     phi = np.eye(n_groups)[:, des_row_groups]
-    phi_n = np.ones(n_groups)
+    # phi_n = np.ones(n_groups)
 
     N_b = phi.sum(axis=1)
     Pr_b = N_b / n_obs
