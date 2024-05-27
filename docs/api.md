@@ -15,5 +15,4 @@ To create the LEMUR object that provides functionality to fit, align, predict, a
 
     tl.LEMUR
     pp.shifted_log_transform
-    pp.get_top_hvgs
 ```

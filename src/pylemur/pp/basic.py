@@ -1,5 +1,4 @@
 import numpy as np
-import scanpy.preprocessing._simple
 import scipy
 
 
@@ -50,29 +49,3 @@ def shifted_log_transform(counts, overdispersion=0.05, pseudo_count=None, minimu
     if scipy.sparse.issparse(counts):
         res = scipy.sparse.csr_matrix(res)
     return res
-
-
-def get_top_hvgs(adata, n=1000, layer=None):
-    """
-    Get the indices of the most variable genes
-
-    Parameters
-    ----------
-    adata
-        The `AnnData` object.
-    n
-        The number of highly variable genes
-    layer
-        The layer with the variance-stabilized values from `adata`. If
-        `layer=None`, the function uses `adata.X`.
-
-    Returns
-    -------
-    A list with the indices of the most highly variable genes from `adata`.
-    """
-    if layer is None:
-        mat = adata.X
-    else:
-        mat = adata.layers[layer]
-    var = scanpy.preprocessing._simple._get_mean_var(mat)[1]
-    return var.argsort()[: -(n + 1) : -1]
