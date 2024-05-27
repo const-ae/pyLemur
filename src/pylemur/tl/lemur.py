@@ -56,27 +56,27 @@ class LEMUR:
 
     Attributes
     ----------
-    embedding : :class:`~numpy.ndarray` (:math:`C \\times P`)
+    embedding : :class:`~numpy.ndarray` (:math:`C \times P`)
         Low-dimensional representation of each cell
     adata : :class:`~anndata.AnnData`
         A reference to (potentially a copy of) the input data.
-    data_matrix : :class:`~numpy.ndarray` (:math:`C \\times G`)
+    data_matrix : :class:`~numpy.ndarray` (:math:`C \times G`)
         A reference to the data matrix from the `adata` object.
     n_embedding : int
         The number of latent dimensions
-    design_matrix : :class:`~formulaic.model_matrix.ModelMatrix` (:math:`C \\times K`)
+    design_matrix : `ModelMatrix` (:math:`C \times K`)
         The design matrix that is used for the fit.
     formula : str
         The design formula specification.
-    coefficients : :class:`~numpy.ndarray` (:math:`P \\times G \\times K`)
+    coefficients : :class:`~numpy.ndarray` (:math:`P \times G \times K`)
         The 3D array of coefficients for the Grassmann regression.
-    alignment_coefficients : :class:`~numpy.ndarray` (:math:`P \\times (P+1) \\times K`)
+    alignment_coefficients : :class:`~numpy.ndarray` (:math:`P \times (P+1) \times K`)
         The 3D array of coefficients for the affine alignment.
-    linear_coefficients : :class:`~numpy.ndarray` (:math:`K\\times G`)
+    linear_coefficients : :class:`~numpy.ndarray` (:math:`K\times G`)
         The 2D array of coefficients for the linear offset per condition.
     linear_coefficient_estimator : str
         The linear coefficient estimation specification.
-    base_point :  :class:`~numpy.ndarray` (:math:`(P \\times G`))
+    base_point :  :class:`~numpy.ndarray` (:math:`(P \times G`))
         The 2D array representing the reference subspace.
 
     Examples
@@ -410,7 +410,7 @@ class LEMUR:
 
         Returns
         -------
-        :class:`~formulaic.model_matrix.ModelMatrix`
+        `ModelMatrix`
             A ModelMatrix instance with one row with the same columns as the design matrix.
 
 
