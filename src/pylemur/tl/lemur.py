@@ -6,12 +6,13 @@ from typing import Any, Literal
 import anndata as ad
 import formulaic
 import numpy as np
+import pandas as pd
 from sklearn.exceptions import NotFittedError
 
-from pylemur.tl._design_matrix_utils import *
+from pylemur.tl._design_matrix_utils import handle_data, handle_design_parameter, handle_obs_data, row_groups
 from pylemur.tl._grassmann import grassmann_map
 from pylemur.tl._grassmann_lm import grassmann_lm, project_data_on_diffemb
-from pylemur.tl._lin_alg_wrappers import *
+from pylemur.tl._lin_alg_wrappers import fit_pca, multiply_along_axis, ridge_regression
 from pylemur.tl.alignment import (
     _align_impl,
     _apply_linear_transformation,
@@ -21,7 +22,7 @@ from pylemur.tl.alignment import (
 
 
 class LEMUR:
-    """Fit the LEMUR model
+    r"""Fit the LEMUR model
 
     A python implementation of the LEMUR algorithm. For more details please refer
     to Ahlmann-Eltze (2024).
@@ -151,7 +152,7 @@ class LEMUR:
             print("Find shared embedding coordinates")
         embedding = project_data_on_diffemb(Y, design_matrix.to_numpy(), coefficients, base_point)
 
-        embedding, coefficients, base_point = order_axis_by_variance(embedding, coefficients, base_point)
+        embedding, coefficients, base_point = _order_axis_by_variance(embedding, coefficients, base_point)
 
         self.embedding = embedding
         self.alignment_coefficients = np.zeros((n_embedding, n_embedding + 1, design_matrix.shape[1]))
@@ -356,7 +357,7 @@ class LEMUR:
 
         if new_condition is not None:
             if new_design is not None:
-                warnings.warn("new_design is ignored if new_condition is provided.")
+                warnings.warn("new_design is ignored if new_condition is provided.", stacklevel=1)
 
             if isinstance(new_condition, pd.DataFrame):
                 new_design = new_condition.to_numpy()
@@ -466,7 +467,7 @@ class LEMUR:
             return f"LEMUR model with {self.n_embedding} dimensions"
 
 
-def order_axis_by_variance(embedding, coefficients, base_point):
+def _order_axis_by_variance(embedding, coefficients, base_point):
     U, d, Vt = np.linalg.svd(embedding, full_matrices=False)
     base_point = Vt @ base_point
     coefficients = np.einsum("pq,qij->pij", Vt, coefficients)
