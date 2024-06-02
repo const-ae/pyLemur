@@ -10,8 +10,12 @@ and this project adheres to [Semantic Versioning][].
 
 ## [Unreleased]
 
+## [0.2.2]
+
 -   Sync with cookiecutter-template update (version 0.4)
 -   Bump required Python version to `3.10`
+-   Allow data frames as design matrices
+-   Allow matrices as input to LEMUR()
 
 ## [0.2.1]
 
