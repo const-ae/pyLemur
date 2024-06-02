@@ -21,10 +21,13 @@ def handle_design_parameter(design, obs_data):
             # Throw error
             raise ValueError("design specified as a 1d array is not supported yet")
         elif design.ndim == 2:
-            design_matrix = design
+            design_matrix = pd.DataFrame(design)
             design_formula = None
         else:
             raise ValueError("design must be a 2d array")
+    elif isinstance(design, pd.DataFrame):
+        design_matrix = design
+        design_formula = None
     elif isinstance(design, list):
         return handle_design_parameter(" * ".join(design), obs_data)
     elif isinstance(design, str):
