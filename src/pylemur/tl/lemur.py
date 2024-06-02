@@ -30,7 +30,7 @@ class LEMUR:
     Parameters
     ----------
     data
-        The AnnData object containing the variance stabilized data and the
+        The AnnData object (or a different matrix container) with the variance stabilized data and the
         cell-wise annotations in `data.obs`.
     design
         A specification of the experimental design. This can be a string,
@@ -90,7 +90,7 @@ class LEMUR:
 
     def __init__(
         self,
-        adata: ad.AnnData,
+        adata: ad.AnnData | Any,
         design: str | list[str] | np.ndarray = "~ 1",
         obs_data: pd.DataFrame | Mapping[str, Iterable[Any]] | None = None,
         n_embedding: int = 15,
@@ -98,6 +98,7 @@ class LEMUR:
         layer: str | None = None,
         copy: bool = True,
     ):
+        adata = _handle_data_arg(adata)
         if copy:
             adata = adata.copy()
         self.adata = adata
@@ -465,6 +466,13 @@ class LEMUR:
             return f"LEMUR model (not fitted yet) with {self.n_embedding} dimensions"
         else:
             return f"LEMUR model with {self.n_embedding} dimensions"
+
+
+def _handle_data_arg(data):
+    if isinstance(data, ad.AnnData):
+        return data
+    else:
+        return ad.AnnData(data)
 
 
 def _order_axis_by_variance(embedding, coefficients, base_point):
