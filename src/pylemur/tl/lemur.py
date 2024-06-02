@@ -186,6 +186,12 @@ class LEMUR:
             `model.embedding` attribute and an the updated alignment coefficients
             stored in `model.alignment_coefficients`.
         """
+        if self.embedding is None:
+            raise NotFittedError(
+                "self.embedding is None. Make sure to call 'model.fit()' "
+                + "before calling 'model.align_with_harmony()'."
+            )
+
         embedding = self.embedding.copy()
         design_matrix = self.design_matrix
         # Init harmony
@@ -246,6 +252,11 @@ class LEMUR:
             `model.embedding` attribute and an the updated alignment coefficients
             stored in `model.alignment_coefficients`.
         """
+        if self.embedding is None:
+            raise NotFittedError(
+                "self.embedding is None. Make sure to call 'model.fit()' "
+                + "before calling 'model.align_with_grouping()'."
+            )
         embedding = self.embedding.copy()
         design_matrix = self.design_matrix
         if isinstance(grouping, list):
