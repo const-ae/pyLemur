@@ -57,8 +57,14 @@ def handle_obs_data(adata, obs_data):
 def make_data_frame(data, preferred_index=None):
     if data is None:
         return None
-    if isinstance(data, pd.DataFrame):
+    if isinstance(data, pd.DataFrame) and preferred_index is None:
         return data
+    if isinstance(data, pd.DataFrame) and preferred_index is not None:
+        if preferred_index.equals(data.index) or preferred_index.equals(data.index.map(str)):
+            data.index = preferred_index
+            return data
+        else:
+            raise ValueError("The index of adata.obs and obsData do not match")
     elif isinstance(data, Mapping):
         return pd.DataFrame(data, index=preferred_index)
     else:
