@@ -39,10 +39,14 @@ adata.layers["counts"] = adata.X.copy()
 
 
 ```{python}
-import pylemur.pp.basic
-adata.layers["logcounts"] = pylemur.pp.basic.shifted_log_transform(adata.X)
-adata = adata[:, pylemur.pp.basic.get_top_hvgs(adata, layer="logcounts", n=1000)]
+sc.pp.normalize_total(adata, target_sum = 1e4, inplace=True)
+sc.pp.log1p(adata)
+adata.layers["logcounts"] = adata.X.copy()
+sc.pp.highly_variable_genes(adata, n_top_genes=1000, flavor="cell_ranger")
+adata = adata[:, adata.var.highly_variable]
+adata
 ```
+
 
 ```{python}
 import pylemur
@@ -51,6 +55,7 @@ model.fit()
 model.align_with_harmony()
 print(model)
 ```
+
 
 ```{python}
 model.embedding.shape
