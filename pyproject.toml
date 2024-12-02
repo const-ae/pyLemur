@@ -4,7 +4,7 @@ requires = ["hatchling"]
 
 [project]
 name = "pyLemur"
-version = "0.2.2"
+version = "0.3.0"
 description = "A Python implementation of the LEMUR algorithm for analyzing multi-condition single-cell RNA-seq data."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -21,6 +21,7 @@ urls.Home-page = "https://github.com/const-ae/pyLemur"
 dependencies = [
     "anndata",
     "formulaic",
+    "formulaic_contrasts",
     "harmonypy",
     "pandas",
     "numpy",
