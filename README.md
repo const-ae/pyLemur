@@ -49,6 +49,12 @@ If you found a bug, please use the [issue tracker][issue-tracker].
 
 ## Building
 
+Install the package in editable mode:
+
+```
+pip install ".[dev,doc,test]"
+```
+
 Build the documentation locally
 
 ```
