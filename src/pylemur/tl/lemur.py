@@ -1,10 +1,9 @@
-import re
 import warnings
 from collections.abc import Iterable, Mapping
 from typing import Any, Literal
 
 import anndata as ad
-import formulaic
+import formulaic_contrasts
 import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
@@ -105,6 +104,13 @@ class LEMUR:
 
         adata.obs = handle_obs_data(adata, obs_data)
         design_matrix, formula = handle_design_parameter(design, adata.obs)
+
+        if formula:
+            self.contrast_builder = formulaic_contrasts.FormulaicContrasts(adata.obs, formula)
+            assert design_matrix.equals(self.contrast_builder.design_matrix)
+        else:
+            self.contrast_builder = None
+
         self.design_matrix = design_matrix
         self.formula = formula
         if design_matrix.shape[0] != adata.shape[0]:
@@ -413,8 +419,6 @@ class LEMUR:
 
         Parameters
         ----------
-        fit
-            The AnnData object produced by `lemur`.
         kwargs
             Named arguments specifying the levels of the covariates from the
             design formula. If a covariate is not specified, the first level is
@@ -432,45 +436,10 @@ class LEMUR:
         commonly used in `R` to test for differences in a regression model.
         This pattern is inspired by the `R` package `glmGamPoi <https://bioconductor.org/packages/glmGamPoi/>`__.
         """
-
-        # This is copied from https://github.com/scverse/multi-condition-comparisions/blob/main/src/multi_condition_comparisions/tl/de.py#L164
-        def _get_var_from_colname(colname):
-            regex = re.compile(r"^.+\[T\.(.+)\]$")
-            return regex.search(colname).groups()[0]
-
-        design_matrix = self.design_matrix
-        variables = design_matrix.model_spec.variables_by_source["data"]
-
-        if not isinstance(design_matrix, formulaic.ModelMatrix):
-            raise RuntimeError(
-                "Building contrasts with `cond` only works if you specified the model using a "
-                "formulaic formula. Please manually provide a contrast vector."
-            )
-        cond_dict = kwargs
-        for var in variables:
-            var_type = design_matrix.model_spec.encoder_state[var][0].value
-            if var_type == "categorical":
-                all_categories = set(design_matrix.model_spec.encoder_state[var][1]["categories"])
-            if var in kwargs:
-                if var_type == "categorical" and kwargs[var] not in all_categories:
-                    raise ValueError(
-                        f"You specified a non-existant category for {var}. Possible categories: {', '.join(all_categories)}"
-                    )
-            else:
-                # fill with default values
-                if var_type != "categorical":
-                    cond_dict[var] = 0
-                else:
-                    var_cols = design_matrix.columns[design_matrix.columns.str.startswith(f"{var}[")]
-
-                    present_categories = {_get_var_from_colname(x) for x in var_cols}
-                    dropped_category = all_categories - present_categories
-                    assert len(dropped_category) == 1
-                    cond_dict[var] = next(iter(dropped_category))
-
-        df = pd.DataFrame([kwargs])
-
-        return design_matrix.model_spec.get_model_matrix(df)
+        if self.contrast_builder:
+            return self.contrast_builder.cond(**kwargs)
+        else:
+            raise ValueError("The design was not specified as a formula. Cannot automatically construct contrast.")
 
     def __str__(self):
         if self.embedding is None:
