@@ -58,6 +58,11 @@ print(model)
 
 
 ```{python}
+ctrl_pred = model.predict(new_condition=model.cond(label="ctrl"))
+model.cond(label = "stim") - model.cond(label = "ctrl")
+```
+
+```{python}
 model.embedding.shape
 model.adata
 ```

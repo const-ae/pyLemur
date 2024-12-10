@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning][].
 
 ## [Unreleased]
 
+# [0.3.1]
+
+- Fix documentation of `cond()` return type and handle pd.Series in
+  `model.predict()` (#5, thanks Mark Keller)
+
 ## [0.3.0]
 
 - Depend on `formulaic_contrast` package
