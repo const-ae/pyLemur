@@ -379,6 +379,8 @@ class LEMUR:
 
             if isinstance(new_condition, pd.DataFrame):
                 new_design = new_condition.to_numpy()
+            elif isinstance(new_condition, pd.Series):
+                new_design = np.expand_dims(new_condition.to_numpy(), axis=0)
             elif isinstance(new_condition, np.ndarray):
                 new_design = new_condition
             else:
@@ -426,8 +428,8 @@ class LEMUR:
 
         Returns
         -------
-        `ModelMatrix`
-            A ModelMatrix instance with one row with the same columns as the design matrix.
+        `pd.Series`
+            A contrast vector that aligns to the columns of the design matrix.
 
 
         Notes
