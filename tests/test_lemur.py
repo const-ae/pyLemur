@@ -29,14 +29,20 @@ def test_numpy_design_matrix_works():
     Y = np.random.randn(500, 30)
     dat = pd.DataFrame({"condition": np.random.choice(["trt", "ctrl"], size=500)})
     design_mat = formulaic.model_matrix("~ condition", dat).to_numpy()
+    grouping = np.random.choice(2, size=500)
 
-    ref_model = pylemur.tl.LEMUR(Y, design="~ condition", obs_data=dat).fit()
+    ref_model = pylemur.tl.LEMUR(Y, design="~ condition", obs_data=dat).fit().align_with_grouping(grouping)
 
-    model = pylemur.tl.LEMUR(Y, design=design_mat).fit()
+    model = pylemur.tl.LEMUR(Y, design=design_mat).fit().align_with_grouping(grouping)
     assert np.allclose(model.coefficients, ref_model.coefficients)
 
-    model = pylemur.tl.LEMUR(ad.AnnData(Y), design=design_mat).fit()
+    model = pylemur.tl.LEMUR(ad.AnnData(Y), design=design_mat).fit().align_with_grouping(grouping)
     assert np.allclose(model.coefficients, ref_model.coefficients)
+
+    design_df = pd.DataFrame(design_mat, columns=["Intercept", "Covar1"])
+    model = pylemur.tl.LEMUR(Y, design=design_df).fit().align_with_grouping(grouping)
+    assert np.allclose(model.coefficients, ref_model.coefficients)
+    assert np.allclose(model.alignment_coefficients, ref_model.alignment_coefficients)
 
 
 def test_pandas_design_matrix_works():
