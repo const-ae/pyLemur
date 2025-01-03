@@ -12,9 +12,9 @@ The Python implementation of the LEMUR method to analyze multi-condition single-
 
 ## Citation
 
-> Ahlmann-Eltze C, Huber W (2024).
-> “Analysis of multi-condition single-cell data with latent embedding multivariate regression.” bioRxiv.
-> [doi:10.1101/2023.03.06.531268](https://doi.org/10.1101/2023.03.06.531268).
+> Ahlmann-Eltze C, Huber W (2025).
+> “Analysis of multi-condition single-cell data with latent embedding multivariate regression.” Nature Genetics (2025).
+> [doi:10.1038/s41588-024-01996-0](https://doi.org/10.1038/s41588-024-01996-0).
 
 # Getting started
 
