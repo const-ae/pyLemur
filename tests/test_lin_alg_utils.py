@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.linear_model import LinearRegression, Ridge
 
+import pylemur.tl.alignment as pylemur_al
 from pylemur.tl._lin_alg_wrappers import *
 
 
@@ -44,3 +45,11 @@ def test_ridge_regression():
 
     reg = Ridge(alpha=pen**4 * 400, fit_intercept=False).fit(X, Y)
     assert np.allclose(beta, reg.coef_.T)
+
+
+def test_forward_reverse_transformations():
+    coef = np.random.randn(5, 6, 2)
+    vec = np.random.randn(2)
+    forward = pylemur_al._forward_linear_transformation(coef, vec)
+    reverse = pylemur_al._reverse_linear_transformation(coef, vec)
+    assert np.allclose(reverse @ forward[:, 1:], np.diag(np.ones(5)))
