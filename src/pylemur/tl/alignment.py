@@ -139,7 +139,8 @@ def _init_harmony(
     sigma = np.repeat(sigma, nclust)
 
     theta = np.repeat(theta, n_groups)
-    theta = theta * (1 - np.exp(-((N_b / (nclust * tau)) ** 2)))
+    if tau != 0:
+        theta = theta * (1 - np.exp(-((N_b / (nclust * tau)) ** 2)))
 
     lamb = np.repeat(lamb, n_groups)
     lamb_mat = np.diag(np.insert(lamb, 0, 0))
