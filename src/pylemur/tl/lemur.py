@@ -1,6 +1,7 @@
 import warnings
 from collections.abc import Iterable, Mapping
 from typing import Any, Literal
+import copy
 
 import anndata as ad
 import formulaic_contrasts
@@ -442,6 +443,35 @@ class LEMUR:
             return self.contrast_builder.cond(**kwargs)
         else:
             raise ValueError("The design was not specified as a formula. Cannot automatically construct contrast.")
+
+    def copy(self, copy_adata = True):
+        cp = copy.deepcopy(self)
+        if copy_adata:
+            cp.adata = self.adata.copy()
+        return cp
+
+    def __deepcopy__(self, memo):
+        cp = LEMUR(self.adata, copy=False)
+        cp.contrast_builder = self.contrast_builder
+        cp.design_matrix = self.design_matrix
+        cp.formula = self.formula
+        cp.data_matrix = self.data_matrix
+        cp.linear_coefficient_estimator = self.linear_coefficient_estimator
+        cp.n_embedding = self.n_embedding
+        cp.embedding = self.embedding
+        cp.coefficients = self.coefficients
+        cp.linear_coefficients = self.linear_coefficients
+        cp.base_point = self.base_point
+        cp.alignment_coefficients = self.alignment_coefficients
+        return cp
+
+
+    def __eq__(self, other):
+        """Equality testing"""
+        raise NotImplementedError(
+            "Equality comparisons are not supported for AnnData objects, "
+            "instead compare the desired attributes."
+        )
 
     def __str__(self):
         if self.embedding is None:
